@@ -103,7 +103,7 @@ YUI.add("deps", function (Y) {
         }
     };
 
-    _.extend(Deps.Computation.prototype, {
+    Y.aggregate(Deps.Computation.prototype, {
 
         onInvalidate: function (f) {
             var self = this;
@@ -191,7 +191,7 @@ YUI.add("deps", function (Y) {
         this._dependentsById = {};
     };
 
-    _.extend(Deps.Dependency.prototype, {
+    Y.aggregate(Deps.Dependency.prototype, {
         // Adds `computation` to this set if it is not already
         // present.  Returns true if `computation` is a new member of the set.
         // If no argument, defaults to currentComputation, or does nothing
@@ -227,7 +227,7 @@ YUI.add("deps", function (Y) {
         }
     });
 
-    _.extend(Deps, {
+    Y.aggregate(Deps, {
         flush: function () {
             // Nested flush could plausibly happen if, say, a flush causes
             // DOM mutation, which causes a "blur" event, which runs an
@@ -315,7 +315,7 @@ YUI.add("deps", function (Y) {
                 return f;
             var nonreactiveVersion = function ( /*arguments*/ ) {
                 var self = this;
-                var args = _.toArray(arguments);
+                var args = Y.Array(arguments);
                 var ret;
                 Deps.nonreactive(function () {
                     ret = f.apply(self, args);

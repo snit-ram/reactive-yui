@@ -1,6 +1,11 @@
 YUI.add("reactive", function (Y) {
     "use strict";
 
+    var ignoredAttributes = {
+        "initialized": true,
+        "destroyed": true
+    };
+
     function ReactiveExtension() {}
     ReactiveExtension.NAME = 'ReactiveExtension';
     ReactiveExtension.prototype.initializer = function () {
@@ -17,11 +22,11 @@ YUI.add("reactive", function (Y) {
     };
 
     ReactiveExtension.prototype._trackAttribute = function (attribute) {
-        if (_.contains(["initialized", "destroyed"], attribute)) {
+        if (ignoredAttributes[attribute]) {
             return;
         }
 
-        if (!_.has(this._deps, attribute)) {
+        if (!Y.Object.hasKey(this._deps, attribute)) {
             this._deps[attribute] = new Y.Deps.Dependency();
 
             this.after(attribute + 'Change', function () {

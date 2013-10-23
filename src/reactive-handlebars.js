@@ -127,10 +127,10 @@ YUI.add("reactive-handlebars", function (Y) {
 
     function getResolvedAttributeValuesFromParams(optionsHash, context) {
         var params = [],
-            paramsIDs = _.isEmpty(optionsHash._params) ? [] : optionsHash._params.split(','),
-            paramTypes = _.isEmpty(optionsHash._types) ? [] : optionsHash._types.split(',');
+            paramsIDs = !optionsHash._params ? [] : optionsHash._params.split(','),
+            paramTypes = !optionsHash._types ? [] : optionsHash._types.split(',');
 
-        _.each(paramTypes, function (type, index) {
+        Y.Array.each(paramTypes, function (type, index) {
             var id = paramsIDs[index],
                 value;
 
@@ -174,19 +174,25 @@ YUI.add("reactive-handlebars", function (Y) {
         var options = Y.merge(_options),
             helperName = options.hash._helper,
             helper = Y.Handlebars.helpers[helperName],
-            hashIDs = _.isEmpty(options.hash._hashIDs) ? [] : options.hash._hashIDs.split(','),
+            hashIDs = !options.hash._hashIDs ? [] : options.hash._hashIDs.split(','),
             escaped = options.hash._escaped,
             params = getResolvedAttributeValuesFromParams(options.hash, context);
 
-        options.hash = _(options.hash)
-            .omit(['_params', '_types', '_helper', '_hashIDs', '_escaped'])
-            .transform(function (result, value, key) {
-                if (_.contains(hashIDs, value)) {
-                    result[key] = _resolveAttributeValue(value, context);
-                } else {
-                    result[key] = value;
-                }
-            }).value();
+        var hash = Y.merge(options.hash);
+        delete hash._params;
+        delete hash._types;
+        delete hash._helper;
+        delete hash._hashIDs;
+        delete hash._escaped;
+
+        options.hash = {};
+        Y.Object.each(hash, function (value, key) {
+            if (hashIDs.indexOf(value) !== -1) {
+                options.hash[key] = _resolveAttributeValue(value, context);
+            } else {
+                options.hash[key] = value;
+            }
+        });
 
         params.push(options);
 
@@ -247,7 +253,7 @@ YUI.add("reactive-handlebars", function (Y) {
     };
 
     Y.Handlebars.registerHelper('_attributeBlockHelper', function (options) {
-        var id = _.uniqueId();
+        var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
             context: this,
@@ -271,7 +277,7 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 
     Y.Handlebars.registerHelper('bindAttr', function (options) {
-        var id = _.uniqueId();
+        var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
             context: this,
@@ -320,7 +326,7 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 
     Y.Handlebars.registerHelper('_attributeMustache', function (options) {
-        var id = _.uniqueId();
+        var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
             context: this,
