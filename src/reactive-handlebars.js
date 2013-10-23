@@ -230,10 +230,6 @@ YUI.add("reactive-handlebars", function (Y) {
             options.context._reactiveComputations = [];
         }
 
-        options.decorate = options.decorate || function (value) {
-            return value;
-        };
-
         var firstRun = true,
             returnValue;
 

@@ -7,7 +7,7 @@
 <script type="text/javascript" src="../src/reactive.js"></script>
 <script type="text/javascript" src="../vendor/sinon.js"></script>
 <script>
-YUI().use(["test", "reactive-handlebars", "model", "model-list"], function (Y) {
+YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model"], function (Y) {
     function stripScripts(text){
         return text.toString().replace(/<\/?script.*?>/g, '');
     }
@@ -19,6 +19,22 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list"], function (Y) {
             delete Y.ReactiveHandlebars.helpers.echo;
             delete Y.ReactiveHandlebars.helpers.secondParam;
             delete Y.ReactiveHandlebars.helpers.isMe;
+            Y.one('#target').empty();
+        },
+
+        _should: {
+            error: {
+                'compiling with null should throw an error': true,
+                'compiling with non string should throw an error': true,
+            }
+        },
+
+        "compiling with null should throw an error": function(){
+            Y.ReactiveHandlebars.compile(null);
+        },
+
+        "compiling with non string should throw an error": function(){
+            Y.ReactiveHandlebars.compile(new Y.Model());
         },
 
         "should render simple mustache": function () {
@@ -215,8 +231,153 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list"], function (Y) {
             Y.Assert.areSame('<div>PLAIN NAME</div>', stripScripts(template(plainData)));
             Y.Assert.areSame('<div>ATTRIBUTE NAME</div>', stripScripts(template(model)));
         },
+
+
+        "should update DOM when single mustache changes": function () {
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<div id="wrapper">{{name}}<div>'),
+                model = new Y.ReactiveModel({
+                    name: 'Anakin'
+                });
+
+            Y.one('#target').setContent(template(model));
+            var wrapper = Y.one('#target');
+            Y.Assert.areSame('Anakin', Y.Lang.trim(wrapper.get('innerText')));
+
+            model.set('name', 'Vader');
+
+            this.wait(function(){
+                Y.Assert.areSame(wrapper.getDOMNode(), Y.one('#target').getDOMNode());
+                Y.Assert.areSame('Vader', Y.Lang.trim(wrapper.get('innerText')));
+            }, 20);
+        },
+
+        "should not break when simple mustache is not in DOM": function () {
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<div id="wrapper">{{name}}<div>'),
+                model = new Y.ReactiveModel({
+                    name: 'Anakin'
+                });
+
+            template(model);
+            model.set('name', 'Vader');
+
+            this.wait(function(){
+                //no exceptions. no assertion are needed
+                Y.Assert.isTrue(true);
+            }, 20);
+        },
+
+        "should update DOM when block helper changes": function () {
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<div id="wrapper">{{#if isDarkSide}}{{sithName}}{{else}}{{jediName}}{{/if}}<div>'),
+                model = new Y.ReactiveModel({
+                    jediName: 'Anakin',
+                    sithName: 'Vader',
+                    isDarkSide: false
+                });
+
+            Y.one('#target').setContent(template(model));
+            var wrapper = Y.one('#target');
+            Y.Assert.areSame('Anakin', Y.Lang.trim(wrapper.get('innerText')));
+
+            model.set('isDarkSide', true);
+
+            this.wait(function(){
+                Y.Assert.areSame(wrapper.getDOMNode(), Y.one('#target').getDOMNode());
+                Y.Assert.areSame('Vader', Y.Lang.trim(wrapper.get('innerText')));
+            }, 20);
+        },
+
+        "should not break when block helper is not in DOM": function () {
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<div id="wrapper">{{#if isDarkSide}}{{sithName}}{{else}}{{jediName}}{{/if}}<div>'),
+                model = new Y.ReactiveModel({
+                    jediName: 'Anakin',
+                    sithName: 'Vader',
+                    isDarkSide: false
+                });
+
+            template(model);
+            model.set('isDarkSide', true);
+
+            this.wait(function(){
+                //no exceptions. no assertion are needed
+                Y.Assert.isTrue(true);
+            }, 20);
+        },
+
+        "bindAttr should update attribues in DOM": function(){
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<input {{bindAttr value="name" data-jedi="isJedi"}}>'),
+                model = new Y.ReactiveModel({
+                    name: 'Anakin',
+                    isJedi: true
+                });
+
+            Y.one('#target').setContent(template(model));
+
+            var input = Y.one('input');
+            Y.Assert.areSame('Anakin', input.get('value'));
+            Y.Assert.areSame('true', input.getAttribute('data-jedi'));
+
+            model.set('name', 'Vader');
+            model.set('isJedi', false);
+
+            this.wait(function(){
+                Y.Assert.areSame(input.getDOMNode(), Y.one('input').getDOMNode());
+                Y.Assert.isFalse(input.hasAttribute('data-jedi'));
+                Y.Assert.areSame('Vader', input.get('value'));
+            }, 20);
+        },
+
+        "bindAttr should not break when it's not in DOM": function () {
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<input {{bindAttr value="name" data-jedi="isJedi"}}>'),
+                model = new Y.ReactiveModel({
+                    name: 'Anakin',
+                    isJedi: true
+                });
+
+            template(model);
+
+            model.set('name', 'Vader');
+            model.set('isJedi', false);
+
+            this.wait(function(){
+                //no exceptions. no assertion are needed
+                Y.Assert.isTrue(true);
+            }, 20);
+        },
+
+        "bindAttr should bind classes correctly": function(){
+            var test = this,
+                template = Y.ReactiveHandlebars.compile('<span {{bindAttr class=":static isJedi:jedi-class:sith-class"}}></span>'),
+                model = new Y.ReactiveModel({
+                    name: 'Anakin',
+                    isJedi: true
+                });
+
+            Y.one('#target').setContent(template(model));
+
+            var span = Y.one('span');
+            Y.Assert.isTrue(span.hasClass('static'));
+            Y.Assert.isTrue(span.hasClass('jedi-class'));
+            Y.Assert.isFalse(span.hasClass('sith-class'));
+
+            model.set('isJedi', false);
+
+            this.wait(function(){
+                Y.Assert.areSame(span.getDOMNode(), Y.one('span').getDOMNode());
+                Y.Assert.isTrue(span.hasClass('static'));
+                Y.Assert.isFalse(span.hasClass('jedi-class'));
+                Y.Assert.isTrue(span.hasClass('sith-class'));
+            }, 20);
+        },
     }));
 
     Y.Test.Runner.run();
 });
 </script>
+<div id="target">
+</div>
