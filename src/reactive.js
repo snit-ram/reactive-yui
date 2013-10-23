@@ -18,7 +18,7 @@ YUI.add("reactive", function (Y) {
         this._reactiveComputations.forEach(function(computation){
             computation.stop();
         });
-        Y.Do.before(this._trackAttribute, this, "get", this);
+        this._reactiveComputations = [];
     };
 
     ReactiveExtension.prototype._trackAttribute = function (attribute) {
