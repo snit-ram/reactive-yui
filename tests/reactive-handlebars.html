@@ -1,0 +1,223 @@
+<script type="text/javascript" src="http://yui.yahooapis.com/3.13.0/build/yui/yui.js"></script>
+<script type="text/javascript" src="http://rawgithub.com/lodash/lodash/2.2.1/dist/lodash.min.js"></script>
+<script type="text/javascript" src="../src/deps.js"></script>
+<script type="text/javascript" src="../src/reactive-handlebars.js"></script>
+<script type="text/javascript" src="../src/reactive-model-list.js"></script>
+<script type="text/javascript" src="../src/reactive-model.js"></script>
+<script type="text/javascript" src="../src/reactive-view.js"></script>
+<script type="text/javascript" src="../src/reactive.js"></script>
+<script type="text/javascript" src="../vendor/sinon.js"></script>
+<script>
+YUI().use(["test", "reactive-handlebars", "model", "model-list"], function (Y) {
+    function stripScripts(text){
+        return text.toString().replace(/<\/?script.*?>/g, '');
+    }
+
+    Y.Test.Runner.setName('Reactive Handlebars');
+
+    Y.Test.Runner.add(new Y.Test.Case({
+        setUp: function(){
+            delete Y.ReactiveHandlebars.helpers.echo;
+            delete Y.ReactiveHandlebars.helpers.secondParam;
+            delete Y.ReactiveHandlebars.helpers.isMe;
+        },
+
+        "should render simple mustache": function () {
+            var template = Y.ReactiveHandlebars.compile("{{name}}"),
+                plainData = {
+                    name: 'PLAIN NAME'
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME'
+                });
+
+            Y.Assert.areSame('PLAIN NAME', stripScripts(template(plainData)));
+            Y.Assert.areSame('ATTRIBUTE NAME', stripScripts(template(model)));
+        },
+
+        "should render nested mustache": function () {
+            var template = Y.ReactiveHandlebars.compile("{{person.name}}"),
+                plainData = {
+                    person: {
+                        name: 'PLAIN NAME'
+                    }
+                },
+                model = new Y.Model({
+                    person: {
+                        name: 'ATTRIBUTE NAME'
+                    }
+                });
+
+            Y.Assert.areSame('PLAIN NAME', stripScripts(template(plainData)));
+            Y.Assert.areSame('ATTRIBUTE NAME', stripScripts(template(model)));
+        },
+
+        "should invoke helpers resolving params": function () {
+            Y.ReactiveHandlebars.registerHelper('echo', function(param){
+                return param;
+            });
+
+            var template = Y.ReactiveHandlebars.compile("{{echo name}}"),
+                plainData = {
+                    name: 'PLAIN NAME'
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME'
+                });
+
+            Y.Assert.areSame('PLAIN NAME', stripScripts(template(plainData)));
+            Y.Assert.areSame('ATTRIBUTE NAME', stripScripts(template(model)));
+        },
+
+        "should invoke block helpers resolving params": function () {
+            Y.ReactiveHandlebars.registerHelper("isMe", function(param, options){
+                if(param === 'me'){
+                    return options.fn();
+                }
+                return options.inverse();
+            });
+
+            var template = Y.ReactiveHandlebars.compile("{{#isMe name}}YES{{else}}NO{{/isMe}}"),
+                plainData = {
+                    name: 'me'
+                },
+                plainNegativeData = {
+                    name: 'not me'
+                }
+                model = new Y.Model({
+                    name: 'me'
+                }),
+                negativeModel = new Y.Model({
+                    name: 'not me'
+                });
+
+
+            Y.Assert.areSame('YES', stripScripts(template(plainData)));
+            Y.Assert.areSame('NO', stripScripts(template(plainNegativeData)));
+
+            Y.Assert.areSame('YES', stripScripts(template(model)));
+            Y.Assert.areSame('NO', stripScripts(template(negativeModel)));
+        },
+
+        "should invoke helpers resolving in any position": function () {
+            Y.ReactiveHandlebars.registerHelper('secondParam', function(firstParam, secondParam){
+                return secondParam;
+            });
+
+            var template = Y.ReactiveHandlebars.compile('{{secondParam false name}}'),
+                plainData = {
+                    name: 'PLAIN NAME'
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME'
+                });
+
+            Y.Assert.areSame('PLAIN NAME', stripScripts(template(plainData)));
+            Y.Assert.areSame('ATTRIBUTE NAME', stripScripts(template(model)));
+        },
+
+        "should invoke helpers without messing with string/boolean params": function () {
+            Y.ReactiveHandlebars.registerHelper('echo', function(firstParam, secondParam, thirdParam){
+                return firstParam + '(' + typeof(firstParam) +  '),'
+                    + secondParam + '(' + typeof(secondParam) +  '),'
+                    + thirdParam + '(' + typeof(thirdParam) +  ')';
+            });
+
+            var template = Y.ReactiveHandlebars.compile('{{echo "name" false true}}'),
+                plainData = {
+                    name: 'PLAIN NAME'
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME'
+                });
+
+            Y.Assert.areSame('name(string),false(boolean),true(boolean)', stripScripts(template(plainData)));
+            Y.Assert.areSame('name(string),false(boolean),true(boolean)', stripScripts(template(model)));
+        },
+
+        "should invoke helpers should not mess with string hash params": function () {
+            Y.ReactiveHandlebars.registerHelper('echo', function(firstParam, options){
+                return options.hash.name + '(' + options.hash.age + ')';
+            });
+
+            var template = Y.ReactiveHandlebars.compile('{{echo false name="snit" age="26"}}'),
+                plainData = {
+                    name: 'PLAIN NAME'
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME'
+                });
+
+            Y.Assert.areSame('snit(26)', stripScripts(template(plainData)));
+            Y.Assert.areSame('snit(26)', stripScripts(template(model)));
+        },
+
+        "should invoke helpers should resolve hash params": function () {
+            Y.ReactiveHandlebars.registerHelper('echo', function(firstParam, options){
+                return options.hash.name + '(' + options.hash.age + ')';
+            });
+
+            var template = Y.ReactiveHandlebars.compile('{{echo false name=name age=age}}'),
+                plainData = {
+                    name: 'PLAIN NAME',
+                    age: 10
+                },
+                model = new Y.Model({
+                    name: 'ATTRIBUTE NAME',
+                    age: 20,
+                });
+
+            Y.Assert.areSame('PLAIN NAME(10)', stripScripts(template(plainData)));
+            Y.Assert.areSame('ATTRIBUTE NAME(20)', stripScripts(template(model)));
+        },
+
+        "should render model lists": function () {
+            var template = Y.ReactiveHandlebars.compile("{{#each people}}{{name}},{{/each}}"),
+                people = [{
+                        name: "Julio"
+                    }, {
+                        name: "Snit"
+                    }],
+                plainData = {
+                    people: people
+                },
+                model = new Y.Model({
+                    people: new Y.ModelList()
+                });
+
+                model.get("people").reset(people);
+
+            Y.Assert.areSame('Julio,Snit,', stripScripts(template(plainData)));
+            Y.Assert.areSame('Julio,Snit,', stripScripts(template(model)));
+        },
+
+        "should keep scaping state": function () {
+            var template = Y.ReactiveHandlebars.compile("{{name}}"),
+                plainData = {
+                    name: '<div>PLAIN NAME</div>'
+                },
+                model = new Y.Model({
+                    name: '<div>ATTRIBUTE NAME</div>'
+                });
+
+            Y.Assert.areSame('&lt;div&gt;PLAIN NAME&lt;/div&gt;', stripScripts(template(plainData)));
+            Y.Assert.areSame('&lt;div&gt;ATTRIBUTE NAME&lt;/div&gt;', stripScripts(template(model)));
+        },
+
+        "should keep non-scaping state": function () {
+            var template = Y.ReactiveHandlebars.compile("{{{name}}}"),
+                plainData = {
+                    name: '<div>PLAIN NAME</div>'
+                },
+                model = new Y.Model({
+                    name: '<div>ATTRIBUTE NAME</div>'
+                });
+
+            Y.Assert.areSame('<div>PLAIN NAME</div>', stripScripts(template(plainData)));
+            Y.Assert.areSame('<div>ATTRIBUTE NAME</div>', stripScripts(template(model)));
+        },
+    }));
+
+    Y.Test.Runner.run();
+});
+</script>

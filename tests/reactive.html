@@ -1,0 +1,141 @@
+<script type="text/javascript" src="http://yui.yahooapis.com/3.13.0/build/yui/yui.js"></script>
+<script type="text/javascript" src="http://rawgithub.com/lodash/lodash/2.2.1/dist/lodash.min.js"></script>
+<script type="text/javascript" src="../src/deps.js"></script>
+<script type="text/javascript" src="../src/reactive-handlebars.js"></script>
+<script type="text/javascript" src="../src/reactive-model-list.js"></script>
+<script type="text/javascript" src="../src/reactive-model.js"></script>
+<script type="text/javascript" src="../src/reactive-view.js"></script>
+<script type="text/javascript" src="../src/reactive.js"></script>
+<script type="text/javascript" src="../vendor/sinon.js"></script>
+<script>
+YUI().use(["test", "reactive", "model"], function (Y) {
+    Y.Test.Runner.setName('Reactive Extension');
+
+    Y.Test.Runner.add(new Y.Test.Case({
+        "should initialize dependency tracking": function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            });
+
+            Y.Assert.isObject(model._deps);
+        },
+
+        'should set deps object for each "get" operation': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            });
+
+            Y.Assert.areSame('SOME NAME', model.get('name'));
+            Y.Assert.isFunction(model._deps.name.depend);
+
+
+            Y.Assert.isUndefined(model.get('age'));
+            Y.Assert.isFunction(model._deps.age.depend);
+        },
+
+        'should trigger change notification for changed attributes': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            });
+
+            model.get('name');
+            model.get('age');
+
+            sinon.stub(model._deps.name, 'changed');
+            sinon.stub(model._deps.age, 'changed');
+
+            model.set('name', 'OTHER NAME');
+
+            Y.Assert.isTrue(model._deps.name.changed.called);
+            Y.Assert.isFalse(model._deps.age.changed.called);
+        },
+
+        'should trigger reactive computation': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            }),
+            computationSpy = sinon.spy(function(){
+                model.get('name');
+            });
+
+            Y.Deps.autorun(computationSpy);
+
+            model.set('name', 'OTHER NAME');
+
+            this.wait(function(){
+                Y.Assert.areSame(2, computationSpy.callCount);
+            }, 10);
+        },
+
+        'should not trigger reactive computation when changed attribute is not in use': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            }),
+            computationSpy = sinon.spy(function(){
+                model.get('name');
+            });
+
+            Y.Deps.autorun(computationSpy);
+
+            model.set('age', 50);
+
+            this.wait(function(){
+                Y.Assert.areSame(1, computationSpy.callCount);
+            }, 10);
+        },
+
+        'should batch reactive computation invocation': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            model = new ModelClass({
+                name: 'SOME NAME'
+            }),
+            computationSpy = sinon.spy(function(){
+                model.get('name');
+            });
+
+            Y.Deps.autorun(computationSpy);
+
+            model.set('name', 'OTHER NAME 1');
+            model.set('name', 'OTHER NAME 2');
+            model.set('name', 'OTHER NAME 3');
+            model.set('name', 'OTHER NAME 4');
+            model.set('name', 'OTHER NAME 5');
+
+            this.wait(function(){
+                Y.Assert.areSame(2, computationSpy.callCount);
+            }, 10);
+        }
+    }));
+
+    Y.Test.Runner.run();
+});
+</script>

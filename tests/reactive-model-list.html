@@ -1,0 +1,56 @@
+<script type="text/javascript" src="http://yui.yahooapis.com/3.13.0/build/yui/yui.js"></script>
+<script type="text/javascript" src="http://rawgithub.com/lodash/lodash/2.2.1/dist/lodash.min.js"></script>
+<script type="text/javascript" src="../src/deps.js"></script>
+<script type="text/javascript" src="../src/reactive-handlebars.js"></script>
+<script type="text/javascript" src="../src/reactive-model-list.js"></script>
+<script type="text/javascript" src="../src/reactive-model.js"></script>
+<script type="text/javascript" src="../src/reactive-view.js"></script>
+<script type="text/javascript" src="../src/reactive.js"></script>
+<script type="text/javascript" src="../vendor/sinon.js"></script>
+<script>
+YUI().use(["test", "reactive-model-list", "model"], function (Y) {
+    Y.Test.Runner.setName('ReactiveModelList');
+
+    Y.Test.Runner.add(new Y.Test.Case({
+        "should track dependencies on gets": function () {
+            var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {}, {
+                ATTRS: {
+                    name: {}
+                }
+            }),
+            modelList = new ModelListClass({
+                name: 'SOME NAME'
+            });
+
+            Y.Assert.areSame('SOME NAME', modelList.get('name'));
+            Y.Assert.isFunction(modelList._deps.name.depend);
+        },
+
+        "should track on desired methods": function () {
+            ['size', 'filter', 'toArray'].forEach(function(method){
+                var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {}, {
+                    ATTRS: {
+                        name: {}
+                    }
+                }),
+                modelList = new ModelListClass({
+                    name: 'SOME NAME'
+                });
+
+                modelList[method].call(modelList, function(){});
+                sinon.stub(modelList._deps._YUIModelListDependency, 'changed');
+                modelList.add({
+                    name: 'SOME NAME'
+                });
+                modelList.remove(modelList.item(0));
+                modelList.reset([{
+                    name: 'OTHER NAME'
+                }]);
+                Y.Assert.areSame(3, modelList._deps._YUIModelListDependency.changed.callCount);
+            });
+        },
+    }));
+
+    Y.Test.Runner.run();
+});
+</script>
