@@ -303,6 +303,11 @@ YUI.add("reactive-handlebars", function (Y) {
             },
             update: function (_value) {
                 var node = Y.one('[data-reactive-handlebars-id="' + id + '"]');
+
+                if(!node){
+                    return;
+                }
+
                 Y.Object.each(_value, function (value, key) {
                     if (value !== undefined && value !== null && value !== false) {
                         node.setAttribute(key, value);
