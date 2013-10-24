@@ -1,55 +1,94 @@
-<script id="template" type="text/handlebars">
-    <ul>
-        <li>
-            <strong>Name:</strong>
-            <span>{{name}}</span>
-        </li>
-        <li>
-            <strong>Instance creation:</strong>
-            <span>{{fuzzyDate createdAt}}</span>
-        </li>
-    </ul>
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+</head>
+<body class="container">
+    <!-- formatting example code is down -->
+    <h1>Defining a handlebars helper</h1>
+    <hr>
+    <h2>Result</h2>
+    <div id="container"></div>
+    <hr>
+    <h2>Change instance creation</h2>
+    <pre style="color:#000000; background-color:#e0eaee; font-size:12pt; font-family:'Courier New',monospace;"><span style="color:#838183; font-style:italic">//sets createdAt to 5 minutes ago</span>
+person<span style="color:#000000">.</span><span style="color:#010181">set</span><span style="color:#000000">(</span><span style="color:#bf0303">'createdAt'</span><span style="color:#000000">,</span> <span style="color:#000000; font-weight:bold">new</span> <span style="color:#010181">Date</span><span style="color:#000000">() -</span> <span style="color:#b07e00">5</span> <span style="color:#000000">*</span> <span style="color:#b07e00">60</span> <span style="color:#000000">*</span> <span style="color:#b07e00">1000</span><span style="color:#000000">);</span>
+</pre>
+    <script>
+    function snippet1(){
+        //sets createdAt to 5 minutes ago
+        person.set('createdAt', new Date() - 5 * 60 * 1000);
+    }
+    </script>
+    <button class="btn btn-primary" onclick="snippet1();">Run</button>
 
-<div id="container"></div>
+    <hr>
+    <p class="text-muted">All code snippets can be run in the javascript console</p>
 
-<script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
-<script src="../src/reactive-handlebars.js"></script>
-<script src="../src/deps.js"></script>
-<script src="../src/reactive.js"></script>
-<script src="../src/reactive-model.js"></script>
-<script src="../src/reactive-model-list.js"></script>
-<script src="http://momentjs.com/downloads/moment.min.js"></script>
-<script>
-YUI().use([
-    'node',
-    'reactive',
-    'reactive-model',
-    'reactive-model-list',
-    'deps',
-    'view',
-    'reactive-handlebars'
-], function(Y){
-    Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
-      ATTRS: {
-        name: {},
-        createdAt: {
-            valueFn: function(){
-                return new Date();
+
+    <!-- example code starts here -->
+    <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+    <script src="../src/reactive-handlebars.js"></script>
+    <script src="../src/deps.js"></script>
+    <script src="../src/reactive.js"></script>
+    <script src="../src/reactive-model.js"></script>
+    <script src="../src/reactive-model-list.js"></script>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
+
+    <script id="template" type="text/handlebars">
+        <ul>
+            <li>
+                <strong>Name:</strong>
+                <span>{{name}}</span>
+            </li>
+            <li>
+                <strong>Instance creation:</strong>
+                <span>{{fuzzyDate createdAt}}</span>
+            </li>
+        </ul>
+    </script>
+
+    <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+    <script src="../src/reactive-handlebars.js"></script>
+    <script src="../src/deps.js"></script>
+    <script src="../src/reactive.js"></script>
+    <script src="../src/reactive-model.js"></script>
+    <script src="../src/reactive-model-list.js"></script>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
+    <script>
+    YUI().use([
+        'node',
+        'reactive',
+        'reactive-model',
+        'reactive-model-list',
+        'deps',
+        'view',
+        'reactive-handlebars'
+    ], function(Y){
+        Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
+          ATTRS: {
+            name: {},
+            createdAt: {
+                valueFn: function(){
+                    return new Date();
+                }
             }
-        }
-      }
-    });
+          }
+        });
 
-    person = new Person({
-        name: 'Mace Windu',
-    });
+        person = new Person({
+            name: 'Mace Windu',
+        });
 
-    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
-        return moment(date).fromNow();
-    });
+        //This helper uses momentjs to format the date
+        Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
+            return moment(date).fromNow();
+        });
 
-    var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
-    Y.one('#container').setContent(template(person));
-});
-</script>
+        var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+        Y.one('#container').setContent(template(person));
+    });
+    </script>
+</body>
+</html>
