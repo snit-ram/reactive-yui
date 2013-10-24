@@ -1,62 +1,98 @@
-<script id="template" type="text/handlebars">
-    <ul>
-        <li>
-            <strong>Name:</strong>
-            <span>{{name}}</span>
-        </li>
-        <li>
-            <strong>Instance creation:</strong>
-            <span>{{fuzzyDate createdAt}}</span>
-        </li>
-    </ul>
-</script>
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+</head>
+<body class="container">
+    <!-- formatting example code is down -->
+    <h1>Triggering reactivity using setInterval</h1>
+    <hr>
+    <h2>Result</h2>
+    <div id="container"></div>
+    <hr>
+    <p>
+        Just keep this page opened for some minutes.
+        You'll notice that the fuzzy date is automatically re-evaluated as
+        the time passes.
+    <p>
 
-<div id="container"></div>
+    <!-- example code starts here -->
+    <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+    <script src="../src/reactive-handlebars.js"></script>
+    <script src="../src/deps.js"></script>
+    <script src="../src/reactive.js"></script>
+    <script src="../src/reactive-model.js"></script>
+    <script src="../src/reactive-model-list.js"></script>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
 
-<script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
-<script src="../src/reactive-handlebars.js"></script>
-<script src="../src/deps.js"></script>
-<script src="../src/reactive.js"></script>
-<script src="../src/reactive-model.js"></script>
-<script src="../src/reactive-model-list.js"></script>
-<script src="http://momentjs.com/downloads/moment.min.js"></script>
-<script>
-YUI().use([
-    'node',
-    'reactive',
-    'reactive-model',
-    'reactive-model-list',
-    'deps',
-    'view',
-    'reactive-handlebars'
-], function(Y){
-    Person = Y.Base.create('personModel', Y.Model, [Y.Reactive], {}, {
-      ATTRS: {
-        name: {},
-        createdAt: {
-            valueFn: function(){
-                return new Date();
+    <script id="template" type="text/handlebars">
+        <ul>
+            <li>
+                <strong>Name:</strong>
+                <span>{{name}}</span>
+            </li>
+            <li>
+                <strong>Instance creation:</strong>
+                <span>{{fuzzyDate createdAt}}</span>
+            </li>
+        </ul>
+    </script>
+
+    <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+    <script src="../src/reactive-handlebars.js"></script>
+    <script src="../src/deps.js"></script>
+    <script src="../src/reactive.js"></script>
+    <script src="../src/reactive-model.js"></script>
+    <script src="../src/reactive-model-list.js"></script>
+    <script src="http://momentjs.com/downloads/moment.min.js"></script>
+    <script>
+    YUI().use([
+        'node',
+        'reactive',
+        'reactive-model',
+        'reactive-model-list',
+        'deps',
+        'view',
+        'reactive-handlebars'
+    ], function(Y){
+        Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
+          ATTRS: {
+            name: {},
+            createdAt: {
+                valueFn: function(){
+                    return new Date();
+                }
             }
-        }
-      }
+          }
+        });
+
+        person = new Person({
+            name: 'Mace Windu'
+        });
+
+
+        //This creates a new reactive dependency tracker
+        var dateDependency = new Y.Deps.Dependency();
+
+        //This helper uses momentjs to format the date
+        Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
+            //this line tells ReactiveHandlebars that the `fuzzyDate` helper
+            //depends on `dateDependency`
+            dateDependency.depend();
+            return moment(date).fromNow();
+        });
+
+        setInterval(function(){
+            //every five seconds we notify a change in the `dateDependency`
+            //causing every helper that depends on it to be re-evaluated
+            dateDependency.changed();
+        }, 5000);
+
+
+        var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+        Y.one('#container').setContent(template(person));
     });
-
-    person = new Person({
-        name: 'Mace Windu',
-    });
-
-    var dateDependency = new Y.Deps.Dependency();
-    setInterval(function(){
-        dateDependency.changed();
-    }, 5000);
-
-    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
-        dateDependency.depend();
-        return moment(date).fromNow();
-    });
-
-
-    var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
-    Y.one('#container').setContent(template(person));
-});
-</script>
+    </script>
+</body>
+</html>
