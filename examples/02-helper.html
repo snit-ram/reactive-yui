@@ -1,0 +1,55 @@
+<script id="template" type="text/handlebars">
+    <ul>
+        <li>
+            <strong>Name:</strong>
+            <span>{{name}}</span>
+        </li>
+        <li>
+            <strong>Instance creation:</strong>
+            <span>{{fuzzyDate createdAt}}</span>
+        </li>
+    </ul>
+</script>
+
+<div id="container"></div>
+
+<script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+<script src="../src/reactive-handlebars.js"></script>
+<script src="../src/deps.js"></script>
+<script src="../src/reactive.js"></script>
+<script src="../src/reactive-model.js"></script>
+<script src="../src/reactive-model-list.js"></script>
+<script src="http://momentjs.com/downloads/moment.min.js"></script>
+<script>
+YUI().use([
+    'node',
+    'reactive',
+    'reactive-model',
+    'reactive-model-list',
+    'deps',
+    'view',
+    'reactive-handlebars'
+], function(Y){
+    Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
+      ATTRS: {
+        name: {},
+        createdAt: {
+            valueFn: function(){
+                return new Date();
+            }
+        }
+      }
+    });
+
+    person = new Person({
+        name: 'Mace Windu',
+    });
+
+    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
+        return moment(date).fromNow();
+    });
+
+    var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+    Y.one('#container').setContent(template(person));
+});
+</script>

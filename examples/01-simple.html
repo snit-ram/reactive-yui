@@ -1,0 +1,56 @@
+<script id="template" type="text/handlebars">
+    <ul>
+        <li>
+            <strong>First Name:</strong>
+            <span>{{firstName}}</span>
+        </li>
+        <li>
+            <strong>Last Name:</strong>
+            <span>{{lastName}}</span>
+        </li>
+        <li>
+            <strong>Full Name:</strong>
+            <span>{{fullName}}</span>
+        </li>
+    </ul>
+</script>
+
+<div id="container"></div>
+
+<script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+<script src="../src/reactive-handlebars.js"></script>
+<script src="../src/deps.js"></script>
+<script src="../src/reactive.js"></script>
+<script src="../src/reactive-model.js"></script>
+<script src="../src/reactive-model-list.js"></script>
+<script>
+YUI().use([
+    'node',
+    'reactive',
+    'reactive-model',
+    'reactive-model-list',
+    'deps',
+    'view',
+    'reactive-handlebars'
+], function(Y){
+    Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
+      ATTRS: {
+        firstName: {},
+        lastName: {},
+        fullName: {
+            getter: function(){
+                return this.get('firstName') + ' ' + this.get('lastName');
+            }
+        }
+      }
+    });
+
+    person = new Person({
+        firstName: 'Anakin',
+        lastName: 'Skywalker',
+    })
+
+    var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+    Y.one('#container').setContent(template(person));
+});
+</script>

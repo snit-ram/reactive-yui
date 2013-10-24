@@ -1,0 +1,60 @@
+<style>
+.sith {
+    background-color: black;
+    color: white;
+}
+.jedi {
+    background-color: #eeeeFF;
+    color: black;
+}
+</style>
+<script id="template" type="text/handlebars">
+    <input name="person" {{bindAttr value="name" class=":static-class isDarkSide:sith:jedi"}}>
+</script>
+
+<div id="container"></div>
+
+<script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+<script src="../src/reactive-handlebars.js"></script>
+<script src="../src/deps.js"></script>
+<script src="../src/reactive.js"></script>
+<script src="../src/reactive-model.js"></script>
+<script src="../src/reactive-model-list.js"></script>
+<script src="http://momentjs.com/downloads/moment.min.js"></script>
+<script>
+YUI().use([
+    'node',
+    'reactive',
+    'reactive-model',
+    'reactive-model-list',
+    'deps',
+    'view',
+    'reactive-handlebars'
+], function(Y){
+    Person = Y.Base.create('personModel', Y.Model, [Y.Reactive], {}, {
+      ATTRS: {
+        name: {},
+        isDarkSide: {}
+      }
+    });
+
+    person = new Person({
+        name: 'Anakin Skywalker',
+        isDarkSide: false
+    });
+
+    var dateDependency = new Y.Deps.Dependency();
+    setInterval(function(){
+        dateDependency.changed();
+    }, 5000);
+
+    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
+        dateDependency.depend();
+        return moment(date).fromNow();
+    });
+
+
+    var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+    Y.one('#container').setContent(template(person));
+});
+</script>
