@@ -410,10 +410,13 @@ YUI.add("reactive-handlebars", function (Y) {
                         var renderedItem = '<script class="_reactive_handlebars_' + itemId + '"></script>' + options.fn(pendingChange.model) + '<script class="_reactive_handlebars_' + itemId + '_end"></script>';
 
                         if (pendingChange.index === 0) {
-                            replaceContent(id, renderedItem);
+                            if(value.size() === 1) {
+                                replaceContent(id, renderedItem);
+                            }else{
+                                Y.one('#_reactive_handlebars_' + id).insert(renderedItem, "after");
+                            }
                         } else {
-                            node = Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1);
-                            node.insert(renderedItem, "after");
+                            node = Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1).insert(renderedItem, "after");
                         }
 
                     } else if (/:remove$/.test(pendingChange.type)) {
