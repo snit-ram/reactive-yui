@@ -138,10 +138,6 @@ YUI.add("reactive-handlebars", function (Y) {
 
             if (type === 'ID') {
                 value = _resolveAttributeValue(id, context);
-
-                if (value && value._isYUIModelList) {
-                    value = value.toArray();
-                }
             } else if (type === 'BOOLEAN') {
                 value = id === "true";
             } else {
@@ -289,7 +285,7 @@ YUI.add("reactive-handlebars", function (Y) {
                 var self = this,
                     returnObject = {};
 
-                var options = Y.ReactiveHandlebars.getExecutionInfo(_options).params[0];
+                var options = Y.ReactiveHandlebars.getExecutionInfo(_options, self).params[0];
 
                 Y.Object.each(options.hash, function (value, key) {
                     if (key === 'class') {
@@ -330,6 +326,118 @@ YUI.add("reactive-handlebars", function (Y) {
             }
         });
     });
+
+
+    Y.ReactiveHandlebars.registerLowLevelHelper('if', function (options) {
+        var id = Y.guid();
+
+        return Y.ReactiveHandlebars.runReactive({
+            context: this,
+            value: function () {
+                var executionInfo = Y.ReactiveHandlebars.getExecutionInfo(options, this),
+                    value = executionInfo.params[0];
+
+                if(value){
+                    if(value._isYUIModelList && value.size() === 0){
+                        return options.inverse(this);
+                    }
+
+                    return options.fn(this);
+                }
+
+                return options.inverse(this);
+            },
+            decorate: function (value) {
+                return new Y.ReactiveHandlebars.SafeString('<script id="_reactive_handlebars_' + id + '"></script>' + value + '<script id="_reactive_handlebars_' + id + '_end"></script>');
+            },
+            update: function (value) {
+                replaceContent(id, value);
+            }
+        });
+    });
+
+
+    Y.ReactiveHandlebars.registerLowLevelHelper('each', function (options) {
+        var id = Y.guid(),
+            self = this;
+
+        function getListContents(value, listId) {
+            var listContents = '';
+
+            if (value._isYUIModelList) {
+                if(value.size() === 0){
+                    return options.inverse(self);
+                }
+
+                value.each(function (item) {
+                    var id = listId + '_list_item';
+                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
+                });
+            } else {
+                if(value.length === 0){
+                    return options.inverse(self);
+                }
+                Y.Array.each(value, function (item) {
+                    var id = listId + '_list_item';
+                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
+                });
+            }
+            return listContents;
+        }
+
+        return Y.ReactiveHandlebars.runReactive({
+            context: this,
+            value: function () {
+                var executionInfo = Y.ReactiveHandlebars.getExecutionInfo(options, this);
+
+                return executionInfo.params[0];
+            },
+            decorate: function (value) {
+                return new Y.ReactiveHandlebars.SafeString('<script id="_reactive_handlebars_' + id + '"></script>' + getListContents(value, id) + '<script id="_reactive_handlebars_' + id + '_end"></script>');
+            },
+            update: function (value) {
+                var pendingChanges = value._reactivePendingChanges || [],
+                    pendingChange;
+
+                while (pendingChanges.length) {
+                    value._deps._YUIModelListDependency.depend();
+
+                    pendingChange = pendingChanges.shift();
+                    var itemId = id + '_list_item',
+                        node;
+
+                    if (/:add$/.test(pendingChange.type)) {
+                        var renderedItem = '<script class="_reactive_handlebars_' + itemId + '"></script>' + options.fn(pendingChange.model) + '<script class="_reactive_handlebars_' + itemId + '_end"></script>';
+
+                        if (pendingChange.index === 0) {
+                            replaceContent(id, renderedItem);
+                        } else {
+                            node = Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1);
+                            node.insert(renderedItem, "after");
+                        }
+
+                    } else if (/:remove$/.test(pendingChange.type)) {
+                        node = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index);
+                        var nextNode;
+
+                        while (!node.hasClass('_reactive_handlebars_' + itemId + '_end')) {
+                            nextNode = Y.one(node.getDOMNode().nextSibling);
+                            node.remove();
+                            node = nextNode;
+                        }
+                        node.remove();
+
+                        if(value.size() === 0){
+                            replaceContent(id, getListContents([], id));
+                        }
+                    } else {
+                        replaceContent(id, getListContents(pendingChange.models, id));
+                    }
+                }
+            }
+        });
+    });
+
 
     Y.Handlebars.registerHelper('_attributeMustache', function (options) {
         if (isLowLevelHelper(options)) {

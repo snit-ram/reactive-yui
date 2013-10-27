@@ -1,15 +1,16 @@
-<style>
-.sith {
-    background-color: black;
-    color: white;
-}
-.jedi {
-    background-color: #eeeeFF;
-    color: black;
-}
-</style>
 <script id="template" type="text/handlebars">
-    <input name="person" {{bindAttr value="name" class=":static-class isDarkSide:sith:jedi"}}>
+    {{#if people}}
+        YES
+    {{else}}
+        NO
+    {{/if}}
+    <ul>
+    {{#each people}}
+        <li>{{name}}</li>
+    {{else}}
+        <li>[[No items]]</li>
+    {{/each}}
+    </ul>
 </script>
 
 <div id="container"></div>
@@ -31,29 +32,33 @@ YUI().use([
     'view',
     'reactive-handlebars'
 ], function(Y){
-    Person = Y.Base.create('personModel', Y.Model, [Y.Reactive], {}, {
+    Person = Y.Base.create('personModel', Y.ReactiveModel, [], {}, {
       ATTRS: {
-        name: {},
-        isDarkSide: {}
+        name: {}
       }
     });
-
-    person = new Person({
-        name: 'Anakin Skywalker',
-        isDarkSide: false
+    People = Y.Base.create('peopleList', Y.ReactiveModelList, [], {
+        model: Person
     });
 
-    var dateDependency = new Y.Deps.Dependency();
-    setInterval(function(){
-        dateDependency.changed();
-    }, 5000);
+    people = new People();
+    people.reset([
+        {
+            name: 'First'
+        },
+        {
+            name: 'Second'
+        },
+        {
+            name: 'Third'
+        }
+    ]);
 
-    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
-        dateDependency.depend();
-        return moment(date).fromNow();
+    x = new Y.ReactiveModel({
+        people: people
     });
 
     var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
-    Y.one('#container').setContent(template(person));
+    Y.one('#container').setContent(template(x));
 });
 </script>
