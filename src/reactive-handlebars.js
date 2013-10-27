@@ -1,13 +1,17 @@
 YUI.add("reactive-handlebars", function (Y) {
     "use strict";
 
-    var reactiveHelpers = {
-        bindAttr: true
-    };
+    var lowLevelHelpers = {};
 
     Y.ReactiveHandlebars = Y.merge(Y.Handlebars);
 
     function ReactiveHandlebarsCompiler() {}
+
+    Y.ReactiveHandlebars.registerLowLevelHelper = function (name, fn) {
+        lowLevelHelpers[name] = true;
+        return Y.ReactiveHandlebars.registerHelper(name, fn);
+    };
+
     Y.ReactiveHandlebars.Compiler = Y.extend(ReactiveHandlebarsCompiler, Y.Handlebars.Compiler, {
         compiler: ReactiveHandlebarsCompiler,
         mustache: function (mustache) {
@@ -16,9 +20,7 @@ YUI.add("reactive-handlebars", function (Y) {
                     part: '_attributeMustache'
                 }]);
 
-            if (!reactiveHelpers[mustache.id.original]) {
-                mustache = new Y.Handlebars.AST.MustacheNode([id], hash, !mustache.escaped);
-            }
+            mustache = new Y.Handlebars.AST.MustacheNode([id], hash, !mustache.escaped);
 
             return Y.Handlebars.Compiler.prototype.mustache.call(this, mustache);
         },
@@ -170,7 +172,7 @@ YUI.add("reactive-handlebars", function (Y) {
         node.insert(value, "after");
     }
 
-    function getExecutionInfo(_options, context) {
+    Y.ReactiveHandlebars.getExecutionInfo = function (_options, context) {
         var options = Y.merge(_options),
             helperName = options.hash._helper,
             helper = Y.Handlebars.helpers[helperName],
@@ -202,7 +204,7 @@ YUI.add("reactive-handlebars", function (Y) {
             helper: helper,
             escaped: escaped
         };
-    }
+    };
 
     function resolveClasses(text, context) {
         var classNames = text.split(' ').map(function (bindPart) {
@@ -246,13 +248,21 @@ YUI.add("reactive-handlebars", function (Y) {
         return returnValue;
     };
 
+    function isLowLevelHelper(options) {
+        return options.hash._helper && lowLevelHelpers[options.hash._helper];
+    }
+
     Y.Handlebars.registerHelper('_attributeBlockHelper', function (options) {
+        if (isLowLevelHelper(options)) {
+            return Y.Handlebars.helpers[options.hash._helper].call(this, options);
+        }
+
         var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
             context: this,
             value: function () {
-                var executionInfo = getExecutionInfo(options, this),
+                var executionInfo = Y.ReactiveHandlebars.getExecutionInfo(options, this),
                     value = executionInfo.helper.apply(this, executionInfo.params);
 
                 if (value === null || value === undefined) {
@@ -270,7 +280,7 @@ YUI.add("reactive-handlebars", function (Y) {
         });
     });
 
-    Y.Handlebars.registerHelper('bindAttr', function (options) {
+    Y.ReactiveHandlebars.registerLowLevelHelper('bindAttr', function (_options) {
         var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
@@ -278,6 +288,8 @@ YUI.add("reactive-handlebars", function (Y) {
             value: function () {
                 var self = this,
                     returnObject = {};
+
+                var options = Y.ReactiveHandlebars.getExecutionInfo(_options).params[0];
 
                 Y.Object.each(options.hash, function (value, key) {
                     if (key === 'class') {
@@ -304,7 +316,7 @@ YUI.add("reactive-handlebars", function (Y) {
             update: function (_value) {
                 var node = Y.one('[data-reactive-handlebars-id="' + id + '"]');
 
-                if(!node){
+                if (!node) {
                     return;
                 }
 
@@ -320,12 +332,16 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 
     Y.Handlebars.registerHelper('_attributeMustache', function (options) {
+        if (isLowLevelHelper(options)) {
+            return Y.Handlebars.helpers[options.hash._helper].call(this, options);
+        }
+
         var id = Y.guid();
 
         return Y.ReactiveHandlebars.runReactive({
             context: this,
             value: function () {
-                var executionInfo = getExecutionInfo(options, this),
+                var executionInfo = Y.ReactiveHandlebars.getExecutionInfo(options, this),
                     value;
 
                 if (executionInfo.isHelper) {
