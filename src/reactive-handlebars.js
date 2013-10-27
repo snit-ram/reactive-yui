@@ -230,17 +230,15 @@ YUI.add("reactive-handlebars", function (Y) {
             options.context._reactiveComputations = [];
         }
 
-        var firstRun = true,
-            returnValue;
+        var returnValue;
 
         options.context._reactiveComputations.push(Y.Deps.autorun(function () {
             var value = options.value.call(options.context);
 
-            if (!firstRun) {
+            if (!this.firstRun) {
                 options.update.call(options.context, value);
                 return;
             }
-            firstRun = false;
 
             returnValue = options.decorate.call(options.context, value);
         }));
