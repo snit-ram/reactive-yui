@@ -165,7 +165,7 @@ YUI.add("reactive-handlebars", function (Y) {
             nodeToRemove = nextNode;
         }
 
-        node.insert(value, "after");
+        insertAfter(node, value);
     }
 
     Y.ReactiveHandlebars.getExecutionInfo = function (_options, context) {
@@ -337,8 +337,8 @@ YUI.add("reactive-handlebars", function (Y) {
                 var executionInfo = Y.ReactiveHandlebars.getExecutionInfo(options, this),
                     value = executionInfo.params[0];
 
-                if(value){
-                    if(value._isYUIModelList && value.size() === 0){
+                if (value) {
+                    if (value._isYUIModelList && value.size() === 0) {
                         return options.inverse(this);
                     }
 
@@ -356,6 +356,34 @@ YUI.add("reactive-handlebars", function (Y) {
         });
     });
 
+    function insertAfter(targetNode, value) {
+        var identifiers = value.match(/_reactive_handlebars[^"]+/g),
+            cleanHTML,
+            tmpNode;
+
+        window.value = value;
+        cleanHTML = value.replace(/<\/tr>((\r|\n|\t|\s)*<script (id|class)="_reactive_handlebars_.*?><\/script>)+/gi, function (x) {
+            return x.replace(/script/g, 'tr');
+        });
+        cleanHTML = cleanHTML.replace(/<script (id|class)="_reactive_handlebars_.*?><\/script>(\r|\n|\t|\s)*<tr[\s>]/gi, function (x) {
+            return x.replace(/script/g, 'tr');
+        });
+        tmpNode = Y.Node.create(cleanHTML);
+
+        Y.Array.forEach(identifiers, function (id) {
+            var nonScriptNode = tmpNode.one('#' + id + ':not(script), .' + id + ':not(script)'),
+                scriptNode;
+
+            if (nonScriptNode) {
+                scriptNode = Y.Node.create('<script></script>');
+                scriptNode.setAttrs(nonScriptNode.getAttrs(['className', 'id']));
+                debugger;
+                nonScriptNode.replace(scriptNode);
+            }
+        });
+
+        targetNode.insert(tmpNode, 'after');
+    }
 
     Y.ReactiveHandlebars.registerLowLevelHelper('each', function (options) {
         var id = Y.guid(),
@@ -365,7 +393,7 @@ YUI.add("reactive-handlebars", function (Y) {
             var listContents = '';
 
             if (value._isYUIModelList) {
-                if(value.size() === 0){
+                if (value.size() === 0) {
                     return options.inverse(self);
                 }
 
@@ -374,12 +402,14 @@ YUI.add("reactive-handlebars", function (Y) {
                     listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
                 });
             } else {
-                if(value.length === 0){
+                if (value.length === 0) {
                     return options.inverse(self);
                 }
                 Y.Array.each(value, function (item) {
-                    var id = listId + '_list_item';
-                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
+                    var id = listId + '_list_item',
+                        itemHTML = options.fn(item);
+
+                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + itemHTML + '<script class="_reactive_handlebars_' + id + '_end"></script>';
                 });
             }
             return listContents;
@@ -412,13 +442,13 @@ YUI.add("reactive-handlebars", function (Y) {
                         console.log(renderedItem);
 
                         if (pendingChange.index === 0) {
-                            if(value.size() === 1) {
+                            if (value.size() === 1) {
                                 replaceContent(id, renderedItem);
-                            }else{
-                                Y.one('#_reactive_handlebars_' + id).insert(renderedItem, "after");
+                            } else {
+                                insertAfter(Y.one('#_reactive_handlebars_' + id), renderedItem);
                             }
                         } else {
-                            node = Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1).insert(renderedItem, "after");
+                            node = insertAfter(Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1), renderedItem);
                         }
 
                     } else if (/:remove$/.test(pendingChange.type)) {
@@ -432,7 +462,7 @@ YUI.add("reactive-handlebars", function (Y) {
                         }
                         node.remove();
 
-                        if(value.size() === 0){
+                        if (value.size() === 0) {
                             replaceContent(id, getListContents([], id));
                         }
                     } else {
