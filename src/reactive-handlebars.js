@@ -408,6 +408,8 @@ YUI.add("reactive-handlebars", function (Y) {
 
                     if (/:add$/.test(pendingChange.type)) {
                         var renderedItem = '<script class="_reactive_handlebars_' + itemId + '"></script>' + options.fn(pendingChange.model) + '<script class="_reactive_handlebars_' + itemId + '_end"></script>';
+                        console.log('********** a');
+                        console.log(renderedItem);
 
                         if (pendingChange.index === 0) {
                             if(value.size() === 1) {

@@ -38,7 +38,10 @@ YUI().use([
       }
     });
     People = Y.Base.create('peopleList', Y.ReactiveModelList, [], {
-        model: Person
+        model: Person,
+        comparator: function (model) {
+            return model.get('name');
+        }
     });
 
     people = new People();
