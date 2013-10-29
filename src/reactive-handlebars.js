@@ -377,7 +377,6 @@ YUI.add("reactive-handlebars", function (Y) {
             if (nonScriptNode) {
                 scriptNode = Y.Node.create('<script></script>');
                 scriptNode.setAttrs(nonScriptNode.getAttrs(['className', 'id']));
-                debugger;
                 nonScriptNode.replace(scriptNode);
             }
         });
