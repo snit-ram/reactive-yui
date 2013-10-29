@@ -357,6 +357,10 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 
     function insertAfter(targetNode, value) {
+        if(!targetNode){
+            return;
+        }
+
         var identifiers = value.match(/_reactive_handlebars[^"]+/g),
             cleanHTML,
             tmpNode;
