@@ -3,6 +3,9 @@ YUI.add("reactive-model-list", function (Y) {
 
     Y.ReactiveModelList = Y.Base.create("ReactiveModelList", Y.ModelList, [Y.Reactive], {
         initializer: function () {
+            this._reactivePendingChanges = [];
+            Y.Do.before(this._trackList, this, "item", this);
+            Y.Do.before(this._trackList, this, "each", this);
             Y.Do.before(this._trackList, this, "size", this);
             Y.Do.before(this._trackList, this, "filter", this);
             Y.Do.before(this._trackList, this, "toArray", this);
@@ -13,7 +16,8 @@ YUI.add("reactive-model-list", function (Y) {
             if (!this._deps._YUIModelListDependency) {
                 this._deps._YUIModelListDependency = new Y.Deps.Dependency();
 
-                this.after(['add', 'remove', 'reset'], function () {
+                this.after(['add', 'remove', 'reset'], function (e) {
+                    self._reactivePendingChanges.push(e);
                     self._deps._YUIModelListDependency.changed();
                 });
             }
