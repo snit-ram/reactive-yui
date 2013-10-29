@@ -361,7 +361,6 @@ YUI.add("reactive-handlebars", function (Y) {
             cleanHTML,
             tmpNode;
 
-        window.value = value;
         cleanHTML = value.replace(/<\/tr>((\r|\n|\t|\s)*<script (id|class)="_reactive_handlebars_.*?><\/script>)+/gi, function (x) {
             return x.replace(/script/g, 'tr');
         });
