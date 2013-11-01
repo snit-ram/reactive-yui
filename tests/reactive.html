@@ -159,7 +159,7 @@ YUI().use(["test", "reactive", "model"], function (Y) {
             Y.Assert.areSame(0, model._reactiveComputations.length);
         },
 
-        "wrap should return the same object": function () {
+        "mix should return the same object": function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
                 ATTRS: {
                     name: {}
@@ -169,10 +169,10 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                 name: 'SOME NAME'
             });
 
-            Y.Assert.areSame(model, Y.Reactive.wrap(model));
+            Y.Assert.areSame(model, Y.Reactive.mix(model));
         },
 
-        "wrap add reactivity": function () {
+        "mix add reactivity": function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [], {}, {
                 ATTRS: {
                     name: {}
@@ -182,12 +182,12 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                 name: 'SOME NAME'
             });
 
-            Y.Assert.areSame(model, Y.Reactive.wrap(model));
+            Y.Assert.areSame(model, Y.Reactive.mix(model));
             Y.Assert.isObject(model._deps);
             Y.Assert.isFunction(model._trackAttribute);
         },
 
-        "wrap don't mess with already reactive instances": function () {
+        "mix don't mess with already reactive instances": function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
                 ATTRS: {
                     name: {}
@@ -198,7 +198,7 @@ YUI().use(["test", "reactive", "model"], function (Y) {
             }),
             oldDeps = model._deps;
 
-            Y.Assert.areSame(model, Y.Reactive.wrap(model));
+            Y.Assert.areSame(model, Y.Reactive.mix(model));
             Y.Assert.areSame(oldDeps, model._deps);
             Y.Assert.isFunction(model._trackAttribute);
         },

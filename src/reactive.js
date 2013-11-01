@@ -36,7 +36,7 @@ YUI.add("reactive", function (Y) {
         this._deps[attribute].depend();
     };
 
-    ReactiveExtension.wrap = function (object) {
+    ReactiveExtension.mix = function (object) {
         if (!object._deps) {
             Y.augment(object, Y.Reactive);
             Y.Reactive.prototype.initializer.call(object);
