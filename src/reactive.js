@@ -15,7 +15,7 @@ YUI.add("reactive", function (Y) {
     };
 
     ReactiveExtension.prototype.destructor = function () {
-        this._reactiveComputations.forEach(function(computation){
+        this._reactiveComputations.forEach(function (computation) {
             computation.stop();
         });
         this._reactiveComputations = [];
@@ -35,6 +35,15 @@ YUI.add("reactive", function (Y) {
         }
         this._deps[attribute].depend();
     };
+
+    ReactiveExtension.wrap = function (object) {
+        if (!object._deps) {
+            Y.augment(object, Y.Reactive);
+            Y.Reactive.prototype.initializer.call(object);
+        }
+
+        return object;
+    }
 
     Y.Reactive = ReactiveExtension;
 }, "@VERSION@", {
