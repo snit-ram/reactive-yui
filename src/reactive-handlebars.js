@@ -357,7 +357,7 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 
     function insertAfter(targetNode, value) {
-        if(!targetNode){
+        if (!targetNode) {
             return;
         }
 
@@ -392,30 +392,34 @@ YUI.add("reactive-handlebars", function (Y) {
             self = this;
 
         function getListContents(value, listId) {
-            return Y.Deps.nonreactive(function(){
-            var listContents = '';
+            return Y.Deps.nonreactive(function () {
+                var listContents = '';
 
-            if (value._isYUIModelList) {
-                if (value.size() === 0) {
+                if (!value) {
                     return options.inverse(self);
                 }
 
-                value.each(function (item) {
-                    var id = listId + '_list_item';
-                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
-                });
-            } else {
-                if (value.length === 0) {
-                    return options.inverse(self);
-                }
-                Y.Array.each(value, function (item) {
-                    var id = listId + '_list_item',
-                        itemHTML = options.fn(item);
+                if (value._isYUIModelList) {
+                    if (value.size() === 0) {
+                        return options.inverse(self);
+                    }
 
-                    listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + itemHTML + '<script class="_reactive_handlebars_' + id + '_end"></script>';
-                });
-            }
-            return listContents;
+                    value.each(function (item) {
+                        var id = listId + '_list_item';
+                        listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
+                    });
+                } else {
+                    if (value.length === 0) {
+                        return options.inverse(self);
+                    }
+                    Y.Array.each(value, function (item) {
+                        var id = listId + '_list_item',
+                            itemHTML = options.fn(item);
+
+                        listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + itemHTML + '<script class="_reactive_handlebars_' + id + '_end"></script>';
+                    });
+                }
+                return listContents;
             });
         }
 
@@ -427,54 +431,58 @@ YUI.add("reactive-handlebars", function (Y) {
                 return executionInfo.params[0];
             },
             decorate: function (value) {
-                value.size && value.size();
+                value && value.size && value.size();
                 var x = new Y.ReactiveHandlebars.SafeString('<script id="_reactive_handlebars_' + id + '"></script>' + getListContents(value, id) + '<script id="_reactive_handlebars_' + id + '_end"></script>');
                 return x;
             },
             update: function (value) {
+                if (value && !value._isYUIModelList) {
+                    return replaceContent(id, getListContents(value, id));
+                }
+
                 value._deps._YUIModelListDependency.depend();
-                return Y.Deps.nonreactive(function(){
-                var pendingChanges = value._reactivePendingChanges || [],
-                    pendingChange;
+                return Y.Deps.nonreactive(function () {
+                    var pendingChanges = value._reactivePendingChanges || [],
+                        pendingChange;
 
-                while (pendingChanges.length) {
+                    while (pendingChanges.length) {
 
-                    pendingChange = pendingChanges.shift();
-                    var itemId = id + '_list_item',
-                        node;
+                        pendingChange = pendingChanges.shift();
+                        var itemId = id + '_list_item',
+                            node;
 
-                    if (/:add$/.test(pendingChange.type)) {
-                        var renderedItem = '<script class="_reactive_handlebars_' + itemId + '"></script>' + options.fn(pendingChange.model) + '<script class="_reactive_handlebars_' + itemId + '_end"></script>';
+                        if (/:add$/.test(pendingChange.type)) {
+                            var renderedItem = '<script class="_reactive_handlebars_' + itemId + '"></script>' + options.fn(pendingChange.model) + '<script class="_reactive_handlebars_' + itemId + '_end"></script>';
 
-                        if (pendingChange.index === 0) {
-                            if (value.size() === 1) {
-                                replaceContent(id, renderedItem);
+                            if (pendingChange.index === 0) {
+                                if (value.size() === 1) {
+                                    replaceContent(id, renderedItem);
+                                } else {
+                                    insertAfter(Y.one('#_reactive_handlebars_' + id), renderedItem);
+                                }
                             } else {
-                                insertAfter(Y.one('#_reactive_handlebars_' + id), renderedItem);
+                                node = insertAfter(Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1), renderedItem);
+                            }
+
+                        } else if (/:remove$/.test(pendingChange.type)) {
+                            node = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index);
+                            var nextNode;
+
+                            while (!node.hasClass('_reactive_handlebars_' + itemId + '_end')) {
+                                nextNode = Y.one(node.getDOMNode().nextSibling);
+                                node.remove();
+                                node = nextNode;
+                            }
+                            node.remove();
+
+                            if (value.size() === 0) {
+                                replaceContent(id, getListContents([], id));
                             }
                         } else {
-                            node = insertAfter(Y.all('._reactive_handlebars_' + itemId + '_end').item(pendingChange.index - 1), renderedItem);
+                            replaceContent(id, getListContents(pendingChange.models, id));
                         }
-
-                    } else if (/:remove$/.test(pendingChange.type)) {
-                        node = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index);
-                        var nextNode;
-
-                        while (!node.hasClass('_reactive_handlebars_' + itemId + '_end')) {
-                            nextNode = Y.one(node.getDOMNode().nextSibling);
-                            node.remove();
-                            node = nextNode;
-                        }
-                        node.remove();
-
-                        if (value.size() === 0) {
-                            replaceContent(id, getListContents([], id));
-                        }
-                    } else {
-                        replaceContent(id, getListContents(pendingChange.models, id));
                     }
-                }
-            });
+                });
             }
         });
     });
