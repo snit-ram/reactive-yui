@@ -356,6 +356,15 @@ YUI.add("reactive-handlebars", function (Y) {
         });
     });
 
+    Y.ReactiveHandlebars.registerLowLevelHelper('unless', function (options) {
+        var fn = options.fn;
+
+        options.fn = options.inverse;
+        options.inverse = fn;
+
+        return Y.ReactiveHandlebars.helpers['if'].call(this, options);
+    });
+
     function insertAfter(targetNode, value) {
         if (!targetNode) {
             return;
