@@ -232,6 +232,46 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
             Y.Assert.areSame('<div>ATTRIBUTE NAME</div>', stripScripts(template(model)));
         },
 
+        "should fallback property lookup for block scope": function () {
+            var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{name}}</div><div>{{age}}</div><div>{{inexistentProperty}}</div>{{/each}}"),
+                modelList = new Y.ModelList();
+                model = new Y.Model({
+                    name: 'PARENT_NAME',
+                    age: 'PARENT_AGE',
+                    list: modelList
+                });
+
+            modelList.add(new Y.Model({
+                age: 'CHILD_AGE'
+            }));
+
+            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div>', stripScripts(template(model)));
+            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div>', stripScripts(template({
+                name: 'PARENT_NAME',
+                age: 'PARENT_AGE',
+                list: [ {
+                    age: 'CHILD_AGE'
+                }]
+            })));
+        },
+
+        "should give precedence to outer functions over inner properties": function () {
+            var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{isSelected}}</div>{{/each}}"),
+                modelList = new Y.ModelList();
+                model = new Y.Model({
+                    list: modelList
+                }),
+                childModel = new Y.Model({
+                    isSelected: true
+                });
+
+            model.isSelected = sinon.stub().returns('DECORATED_IS_SELECTED');
+
+            modelList.add(childModel);
+
+            Y.Assert.areSame('<div>DECORATED_IS_SELECTED</div>', stripScripts(template(model)));
+            Y.Assert.isTrue(model.isSelected.calledWith(childModel));
+        },
 
         "should update DOM when single mustache changes": function () {
             var test = this,
