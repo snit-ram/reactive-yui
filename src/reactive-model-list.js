@@ -7,6 +7,7 @@ YUI.add("reactive-model-list", function (Y) {
             Y.Do.before(this._trackList, this, "item", this);
             Y.Do.before(this._trackList, this, "each", this);
             Y.Do.before(this._trackList, this, "size", this);
+            Y.Do.before(this._trackList, this, "some", this);
             Y.Do.before(this._trackList, this, "filter", this);
             Y.Do.before(this._trackList, this, "toArray", this);
         },
