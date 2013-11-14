@@ -233,24 +233,28 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
         },
 
         "should fallback property lookup for block scope": function () {
-            var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{name}}</div><div>{{age}}</div><div>{{inexistentProperty}}</div>{{/each}}"),
+            var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{name}}</div><div>{{age}}</div><div>{{inexistentProperty}}</div><div>{{gender}}</div>{{/each}}"),
                 modelList = new Y.ModelList();
                 model = new Y.Model({
                     name: 'PARENT_NAME',
                     age: 'PARENT_AGE',
+                    gender: 'PARENT_GENDER',
                     list: modelList
                 });
 
             modelList.add(new Y.Model({
-                age: 'CHILD_AGE'
+                age: 'CHILD_AGE',
+                gender: undefined
             }));
 
-            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div>', stripScripts(template(model)));
-            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div>', stripScripts(template({
+            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div><div></div>', stripScripts(template(model)));
+            Y.Assert.areSame('<div>PARENT_NAME</div><div>CHILD_AGE</div><div></div><div></div>', stripScripts(template({
                 name: 'PARENT_NAME',
                 age: 'PARENT_AGE',
+                gender: 'PARENT_GENDER',
                 list: [ {
-                    age: 'CHILD_AGE'
+                    age: 'CHILD_AGE',
+                    gender: undefined
                 }]
             })));
         },
