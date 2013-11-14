@@ -136,13 +136,9 @@ YUI.add("reactive-handlebars", function (Y) {
 
                 Y.Array.some(contexts, function (context) {
                     if (context._ATTR_E_FACADE) {
-                        if (Y.Object.hasKey(context._state.data, id)) {
-                            returnValue = context.get(id);
-                            return true;
-                        }
+                        returnValue = context.get(id);
 
-                        returnValue = undefined;
-                        return false;
+                        return returnValue !== undefined;
                     }
 
                     if (Y.Object.hasKey(context, id)) {
