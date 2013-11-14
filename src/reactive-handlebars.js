@@ -136,13 +136,15 @@ YUI.add("reactive-handlebars", function (Y) {
 
                 Y.Array.some(contexts, function (context) {
                     if (context._ATTR_E_FACADE) {
-                        returnValue = context.get(id);
-
-                        if (returnValue === undefined) {
-                            return Y.Object.hasKey(context._state.data, id);
+                        // We should skip this context if the ModelList does not have the desired attribute
+                        // otherwise ModelList.get would return values from its items
+                        if (context._isYUIModelList && !Y.Object.hasKey(context._attrs, id)) {
+                            returnValue = undefined;
+                            return false;
                         }
 
-                        return true;
+                        returnValue = context.get(id);
+                        return Y.Object.hasKey(context._state.data, id);
                     }
 
                     if (Y.Object.hasKey(context, id)) {

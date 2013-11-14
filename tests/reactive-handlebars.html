@@ -259,6 +259,22 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
             })));
         },
 
+        "should not fallback property lookup to list children attributes": function () {
+            var template = Y.ReactiveHandlebars.compile("{{#each list}}{{#with list}}<div>{{name}}</div>{{/with}}{{/each}}"),
+                modelList = new Y.ModelList();
+                model = new Y.Model({
+                    list: modelList
+                });
+
+            modelList.add(new Y.Model({}));
+            modelList.add(new Y.Model({
+                name: 'SOME_NAME'
+            }));
+
+            Y.Assert.areSame('<div></div><div>SOME_NAME</div>', stripScripts(template(model)));
+        },
+
+
         "should give precedence to outer functions over inner properties": function () {
             var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{isSelected}}</div>{{/each}}"),
                 modelList = new Y.ModelList();
