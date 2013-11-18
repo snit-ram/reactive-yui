@@ -43,16 +43,6 @@ YUI().use([
         isDarkSide: false
     });
 
-    var dateDependency = new Y.Deps.Dependency();
-    setInterval(function(){
-        dateDependency.changed();
-    }, 5000);
-
-    Y.ReactiveHandlebars.registerHelper('fuzzyDate', function(date){
-        dateDependency.depend();
-        return moment(date).fromNow();
-    });
-
     var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
     Y.one('#container').setContent(template(person));
 });
