@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css">
+    <link rel="stylesheet" href="http://netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap-theme.min.css">
+</head>
+<body class="container">
+    <!-- formatting example code is down -->
+    <h1>Simple data binding</h1>
+    <hr>
+    <h2>Result</h2>
+    <div id="container"></div>
+    <hr>
+    <h2>Change Last Name</h2>
+    <pre style="color:#000000; background-color:#e0eaee; font-size:12pt; font-family:'Courier New',monospace;">person<span style="color:#000000">.</span><span style="color:#010181">set</span><span style="color:#000000">(</span><span style="color:#bf0303">'lastName'</span><span style="color:#000000">,</span> <span style="color:#bf0303">'Vader'</span><span style="color:#000000">);</span></pre>
+    <script>
+    function snippet1(){
+        person.set('lastName', 'Vader');
+    }
+    </script>
+    <button class="btn btn-primary" onclick="snippet1();">Run</button>
+
+    <hr>
+    <h2>Change First Name</h2>
+    <pre style="color:#000000; background-color:#e0eaee; font-size:12pt; font-family:'Courier New',monospace;">person<span style="color:#000000">.</span><span style="color:#010181">set</span><span style="color:#000000">(</span><span style="color:#bf0303">'firstName'</span><span style="color:#000000">,</span> <span style="color:#bf0303">'Darth'</span><span style="color:#000000">);</span></pre>
+    <script>
+    function snippet2(){
+        person.set('firstName', 'Darth');
+    }
+    </script>
+    <button class="btn btn-primary" onclick="snippet2();">Run</button>
+    <hr>
+    <p class="text-muted">All code snippets can be run in the javascript console</p>
+
+
+    <!-- example code starts here -->
+    <script src="http://yui.yahooapis.com/3.13.0/build/yui/yui-min.js"></script>
+
+    <script id="template" type="text/handlebars">
+        <ul>
+            <li>
+                <strong>First Name:</strong>
+                <span>{{firstName}}</span>
+            </li>
+            <li>
+                <strong>Last Name:</strong>
+                <span>{{lastName}}</span>
+            </li>
+            <li>
+                <strong>Full Name:</strong>
+                <span>{{fullName}}</span>
+            </li>
+        </ul>
+    </script>
+    <script>
+    YUI({
+        modules: {
+            'reactive-handlebars': {
+                fullpath: '../src/reactive-handlebars.js'
+            },
+            'deps': {
+                fullpath: '../src/deps.js'
+            },
+            'reactive-model-list': {
+                fullpath: '../src/reactive-model-list.js'
+            },
+            'reactive-model': {
+                fullpath: '../src/reactive-model.js'
+            },
+            'reactive-view': {
+                fullpath: '../src/reactive-view.js'
+            },
+            'reactive': {
+                fullpath: '../src/reactive.js'
+            }
+        }
+    }).use([
+        'node',
+        'reactive',
+        'reactive-model',
+        'reactive-model-list',
+        'deps',
+        'view',
+        'reactive-handlebars'
+    ], function(Y){
+        Person = Y.Base.create('person', Y.Model, [Y.Reactive], {}, {
+          ATTRS: {
+            firstName: {},
+            lastName: {},
+            fullName: {
+                getter: function(){
+                    return this.get('firstName') + ' ' + this.get('lastName');
+                }
+            }
+          }
+        });
+
+        person = new Person({
+            firstName: 'Anakin',
+            lastName: 'Skywalker',
+        })
+
+        var template = Y.ReactiveHandlebars.compile(Y.one('#template').getHTML());
+        Y.one('#container').setContent(template(person));
+    });
+    </script>
+</body>
+</html>
