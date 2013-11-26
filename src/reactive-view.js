@@ -2,11 +2,9 @@ YUI.add("reactive-view", function (Y) {
     "use strict";
 
     Y.ReactiveView = Y.Base.create("ReactiveView", Y.View, [Y.Reactive], {
-        beforeRender: function () {},
         afterRender: function () {},
 
-        destructor: function () {
-        },
+        destructor: function () {},
 
         render: function () {
             var self = this;
@@ -18,10 +16,6 @@ YUI.add("reactive-view", function (Y) {
             }
 
             var contents = self.template(self);
-
-            if (self.beforeRender() === false) {
-                return this; //abort rendering
-            }
 
             self.get('container').setContent(contents);
             self.afterRender();
