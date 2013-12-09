@@ -495,7 +495,7 @@ YUI.add("reactive-handlebars", function (Y) {
                     return replaceContent(id, getListContents(value, id));
                 }
 
-                value._deps._YUIModelListDependency.depend();
+                value.size();
                 return Y.Deps.nonreactive(function () {
                     var pendingChanges = value._reactivePendingChanges || [],
                         pendingChange;
