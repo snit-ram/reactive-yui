@@ -259,6 +259,29 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
             })));
         },
 
+        "should not fallback property lookup in full paths": function () {
+            var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{this.name}}</div><div>{{this.age}}</div>{{/each}}"),
+                modelList = new Y.ModelList();
+                model = new Y.Model({
+                    name: 'PARENT_NAME',
+                    list: modelList
+                });
+
+            modelList.add(new Y.Model({
+                age: 'CHILD_AGE',
+                gender: undefined
+            }));
+
+            Y.Assert.areSame('<div></div><div>CHILD_AGE</div>', stripScripts(template(model)));
+            Y.Assert.areSame('<div></div><div>CHILD_AGE</div>', stripScripts(template({
+                name: 'PARENT_NAME',
+                age: 'PARENT_AGE',
+                list: [ {
+                    age: 'CHILD_AGE',
+                }]
+            })));
+        },
+
         "should not fallback property lookup to list children attributes": function () {
             var template = Y.ReactiveHandlebars.compile("{{#each list}}{{#with list}}<div>{{name}}</div>{{/with}}{{/each}}"),
                 modelList = new Y.ModelList();
