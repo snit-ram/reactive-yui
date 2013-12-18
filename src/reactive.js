@@ -29,8 +29,10 @@ YUI.add("reactive", function (Y) {
         if (!Y.Object.hasKey(this._deps, attribute)) {
             this._deps[attribute] = new Y.Deps.Dependency();
 
-            this.after(attribute + 'Change', function () {
-                this._deps[attribute].changed();
+            this.after(attribute + 'Change', function (event) {
+                if (event.newVal !== event.prevVal) {
+                    this._deps[attribute].changed();
+                }
             }, this);
         }
         this._deps[attribute].depend();

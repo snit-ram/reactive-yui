@@ -64,6 +64,26 @@ YUI().use(["test", "reactive", "model"], function (Y) {
             Y.Assert.isFalse(model._deps.age.changed.called);
         },
 
+        'should not trigger change notification when the new value is the same as the previous one': function () {
+            var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
+                ATTRS: {
+                    child: {}
+                }
+            }),
+                child = new Y.Model({}),
+                model = new ModelClass({
+                    child: child
+                });
+
+            model.get('child');
+
+            sinon.stub(model._deps.child, 'changed');
+
+            model.set('child', child);
+
+            Y.Assert.isFalse(model._deps.child.changed.called);
+        },
+
         'should trigger reactive computation': function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
                 ATTRS: {
