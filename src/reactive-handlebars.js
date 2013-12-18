@@ -126,17 +126,12 @@ YUI.add("reactive-handlebars", function (Y) {
 
             // when accessing this, we don't need to change the context
             if (id !== 'this') {
-                var methodFound = Y.Array.some(reversedContexts, function (context) {
-                    if (typeof context[id] === 'function') {
-                        returnValue = context[id](returnValue);
-                        return true;
-                    }
-
-                    return false;
+                var firstMethod = Y.Array.find(reversedContexts, function (context) {
+                    return Y.Lang.isFunction(context[id]);
                 });
 
-                if (methodFound) {
-                    return returnValue;
+                if (firstMethod) {
+                    return returnValue = firstMethod[id](returnValue);
                 }
 
                 Y.Array.some(contexts, function (context) {
@@ -576,6 +571,7 @@ YUI.add("reactive-handlebars", function (Y) {
     });
 }, "@VERSION@", {
     requires: [
+        'array-extras',
         "handlebars",
         "oop",
         "node",
