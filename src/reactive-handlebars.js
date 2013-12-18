@@ -116,14 +116,12 @@ YUI.add("reactive-handlebars", function (Y) {
                 return returnValue;
             }
 
-            var contexts, reversedContexts;
+            var contexts = [returnValue],
+                reversedContexts = [returnValue];
 
             if (identifierPathIndex === 0) {
-                contexts = [returnValue].concat(additionalContexts || []);
-                reversedContexts = [returnValue].concat(additionalContexts || []).reverse();
-            } else {
-                contexts = [returnValue];
-                reversedContexts = [returnValue];
+                contexts = contexts.concat(additionalContexts || []);
+                reversedContexts = reversedContexts.concat(additionalContexts || []).reverse();
             }
 
             // when accessing this, we don't need to change the context
