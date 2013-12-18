@@ -26,7 +26,7 @@ YUI().use(["test", "reactive-model-list", "model"], function (Y) {
         },
 
         "should track on desired methods": function () {
-            ['size', 'some', 'filter', 'toArray', 'getById', 'getByClientId'].forEach(function (method) {
+            ['size', 'some', 'filter', 'toArray'].forEach(function (method) {
                 var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {}, {
                     ATTRS: {
                         name: {}
@@ -48,6 +48,206 @@ YUI().use(["test", "reactive-model-list", "model"], function (Y) {
                 Y.Assert.areSame(3, modelList._deps._YUIModelListDependency.changed.callCount);
             });
         },
+
+        "should correctly notify getById updates": function () {
+            var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {});
+
+            var modelList = new ModelListClass();
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 2
+            }, {
+                id: 3
+            }, ]);
+
+            var noChangeSpy = sinon.spy(function () {
+                modelList.getById(1);
+            });
+
+            var removedSpy = sinon.spy(function () {
+                modelList.getById(2);
+            });
+
+            var addedSpy = sinon.spy(function () {
+                modelList.getById(5);
+            });
+
+            Y.Deps.autorun(noChangeSpy);
+            Y.Deps.autorun(removedSpy);
+            Y.Deps.autorun(addedSpy);
+
+            noChangeSpy.reset();
+            removedSpy.reset();
+            addedSpy.reset();
+
+            modelList.remove(modelList.item(1));
+            modelList.add({
+                id: 5
+            });
+
+            this.wait(function () {
+                Y.Assert.isFalse(noChangeSpy.called, 'should not call noChangeSpy');
+                Y.Assert.isTrue(removedSpy.calledOnce, 'should call removedSpy');
+                Y.Assert.isTrue(addedSpy.calledOnce, 'should call addedSpy');
+            }, 200);
+        },
+
+        "should correctly notify getById updates when reseting the list": function () {
+            var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {});
+
+            var modelList = new ModelListClass();
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 2
+            }, {
+                id: 3
+            }, ]);
+
+            var noChangeSpy = sinon.spy(function () {
+                modelList.getById(1);
+            });
+
+            var removedSpy = sinon.spy(function () {
+                modelList.getById(2);
+            });
+
+            var addedSpy = sinon.spy(function () {
+                modelList.getById(5);
+            });
+
+            Y.Deps.autorun(noChangeSpy);
+            Y.Deps.autorun(removedSpy);
+            Y.Deps.autorun(addedSpy);
+
+            noChangeSpy.reset();
+            removedSpy.reset();
+            addedSpy.reset();
+
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 5
+            }]);
+
+            this.wait(function () {
+                Y.Assert.isFalse(noChangeSpy.called, 'should not call noChangeSpy');
+                Y.Assert.isTrue(removedSpy.calledOnce, 'should call removedSpy');
+                Y.Assert.isTrue(addedSpy.calledOnce, 'should call addedSpy');
+            }, 200);
+        },
+
+        "should correctly notify getByClientId updates": function () {
+            var ModelClass = Y.Base.create('Model' + Date.now(), Y.Model, [], {}, {
+                ATTRS: {
+                    clientId: {
+                        getter: function () {
+                            return this.get('id');
+                        }
+                    }
+                }
+            });
+            var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {
+                model: ModelClass
+            });
+
+            var modelList = new ModelListClass();
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 2
+            }, {
+                id: 3
+            }, ]);
+
+            var noChangeSpy = sinon.spy(function () {
+                modelList.getByClientId(1);
+            });
+
+            var removedSpy = sinon.spy(function () {
+                modelList.getByClientId(2);
+            });
+
+            var addedSpy = sinon.spy(function () {
+                modelList.getByClientId(5);
+            });
+
+            Y.Deps.autorun(noChangeSpy);
+            Y.Deps.autorun(removedSpy);
+            Y.Deps.autorun(addedSpy);
+
+            noChangeSpy.reset();
+            removedSpy.reset();
+            addedSpy.reset();
+
+            modelList.remove(modelList.item(1));
+            modelList.add({
+                id: 5
+            });
+
+            this.wait(function () {
+                Y.Assert.isFalse(noChangeSpy.called, 'should not call noChangeSpy');
+                Y.Assert.isTrue(removedSpy.calledOnce, 'should call removedSpy');
+                Y.Assert.isTrue(addedSpy.calledOnce, 'should call addedSpy');
+            }, 200);
+        },
+
+        "should correctly notify getByClientId updates when reseting the list": function () {
+            var ModelClass = Y.Base.create('Model' + Date.now(), Y.Model, [], {}, {
+                ATTRS: {
+                    clientId: {
+                        getter: function () {
+                            return this.get('id');
+                        }
+                    }
+                }
+            });
+            var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {
+                model: ModelClass
+            });
+
+            var modelList = new ModelListClass();
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 2
+            }, {
+                id: 3
+            }, ]);
+
+            var noChangeSpy = sinon.spy(function () {
+                modelList.getByClientId(1);
+            });
+
+            var removedSpy = sinon.spy(function () {
+                modelList.getByClientId(2);
+            });
+
+            var addedSpy = sinon.spy(function () {
+                modelList.getByClientId(5);
+            });
+
+            Y.Deps.autorun(noChangeSpy);
+            Y.Deps.autorun(removedSpy);
+            Y.Deps.autorun(addedSpy);
+
+            noChangeSpy.reset();
+            removedSpy.reset();
+            addedSpy.reset();
+
+            modelList.reset([{
+                id: 1
+            }, {
+                id: 5
+            }]);
+
+            this.wait(function () {
+                Y.Assert.isFalse(noChangeSpy.called, 'should not call noChangeSpy');
+                Y.Assert.isTrue(removedSpy.calledOnce, 'should call removedSpy');
+                Y.Assert.isTrue(addedSpy.calledOnce, 'should call addedSpy');
+            }, 200);
+        }
     }));
 
     Y.Test.Runner.run();
