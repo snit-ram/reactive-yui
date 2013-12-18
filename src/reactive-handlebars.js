@@ -126,12 +126,12 @@ YUI.add("reactive-handlebars", function (Y) {
 
             // when accessing this, we don't need to change the context
             if (id !== 'this') {
-                var firstMethod = Y.Array.find(reversedContexts, function (context) {
+                var firstContextWithMethod = Y.Array.find(reversedContexts, function (context) {
                     return Y.Lang.isFunction(context[id]);
                 });
 
-                if (firstMethod) {
-                    return returnValue = firstMethod[id](returnValue);
+                if (firstContextWithMethod) {
+                    return returnValue = firstContextWithMethod[id](returnValue);
                 }
 
                 Y.Array.some(contexts, function (context) {
