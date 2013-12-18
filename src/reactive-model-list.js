@@ -61,6 +61,18 @@ YUI.add("reactive-model-list", function (Y) {
             }
 
             this._deps._YUIModelListDependency.depend();
+        },
+
+        getById: function (id) {
+            this._idDeps[id] = this._idDeps[id] || new Y.Deps.Dependency();
+            this._idDeps[id].depend();
+            return Y.ModelList.prototype.getById.call(this, id);
+        },
+
+        getByClientId: function (id) {
+            this._clientIdDeps[id] = this._clientIdDeps[id] || new Y.Deps.Dependency();
+            this._clientIdDeps[id].depend();
+            return Y.ModelList.prototype.getByClientId.call(this, id);
         }
     });
 }, "@VERSION@", {
