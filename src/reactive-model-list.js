@@ -25,6 +25,12 @@ YUI.add("reactive-model-list", function (Y) {
             this._trackGetById('clientId');
         },
 
+        destructor: function () {
+            this._reactivePendingChanges = [];
+            this._idDeps = {};
+            this._clientIdDeps = {};
+        },
+
         _trackGetById: function (idPropertyName) {
             var depsPropertyName = '_' + idPropertyName + 'Deps';
 
