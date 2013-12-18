@@ -19,9 +19,9 @@ YUI().use(["test", "reactive-view", 'reactive-handlebars'], function (Y) {
                     name: {}
                 }
             }),
-            view = new ViewClass({
-                name: 'SOME NAME'
-            });
+                view = new ViewClass({
+                    name: 'SOME NAME'
+                });
 
             view.render();
             view.get('container').appendTo('body');
@@ -29,7 +29,7 @@ YUI().use(["test", "reactive-view", 'reactive-handlebars'], function (Y) {
 
             view.set('name', 'OTHER NAME');
 
-            this.wait(function(){
+            this.wait(function () {
                 Y.Assert.areSame('OTHER NAME', view.get('container').get('innerText'));
                 view.get('container').remove();
             }, 10);
