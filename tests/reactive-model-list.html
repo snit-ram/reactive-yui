@@ -17,26 +17,26 @@ YUI().use(["test", "reactive-model-list", "model"], function (Y) {
                     name: {}
                 }
             }),
-            modelList = new ModelListClass({
-                name: 'SOME NAME'
-            });
+                modelList = new ModelListClass({
+                    name: 'SOME NAME'
+                });
 
             Y.Assert.areSame('SOME NAME', modelList.get('name'));
             Y.Assert.isFunction(modelList._deps.name.depend);
         },
 
         "should track on desired methods": function () {
-            ['size', 'some', 'filter', 'toArray'].forEach(function(method){
+            ['size', 'some', 'filter', 'toArray'].forEach(function (method) {
                 var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {}, {
                     ATTRS: {
                         name: {}
                     }
                 }),
-                modelList = new ModelListClass({
-                    name: 'SOME NAME'
-                });
+                    modelList = new ModelListClass({
+                        name: 'SOME NAME'
+                    });
 
-                modelList[method].call(modelList, function(){});
+                modelList[method].call(modelList, function () {});
                 sinon.stub(modelList._deps._YUIModelListDependency, 'changed');
                 modelList.add({
                     name: 'SOME NAME'

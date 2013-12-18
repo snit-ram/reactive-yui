@@ -17,9 +17,9 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                });
 
             Y.Assert.isObject(model._deps);
         },
@@ -30,9 +30,9 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                });
 
             Y.Assert.areSame('SOME NAME', model.get('name'));
             Y.Assert.isFunction(model._deps.name.depend);
@@ -48,9 +48,9 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                });
 
             model.get('name');
             model.get('age');
@@ -70,18 +70,18 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            }),
-            computationSpy = sinon.spy(function(){
-                model.get('name');
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                }),
+                computationSpy = sinon.spy(function () {
+                    model.get('name');
+                });
 
             Y.Deps.autorun(computationSpy);
 
             model.set('name', 'OTHER NAME');
 
-            this.wait(function(){
+            this.wait(function () {
                 Y.Assert.areSame(2, computationSpy.callCount);
             }, 10);
         },
@@ -92,18 +92,18 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            }),
-            computationSpy = sinon.spy(function(){
-                model.get('name');
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                }),
+                computationSpy = sinon.spy(function () {
+                    model.get('name');
+                });
 
             Y.Deps.autorun(computationSpy);
 
             model.set('age', 50);
 
-            this.wait(function(){
+            this.wait(function () {
                 Y.Assert.areSame(1, computationSpy.callCount);
             }, 10);
         },
@@ -114,12 +114,12 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            }),
-            computationSpy = sinon.spy(function(){
-                model.get('name');
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                }),
+                computationSpy = sinon.spy(function () {
+                    model.get('name');
+                });
 
             Y.Deps.autorun(computationSpy);
 
@@ -129,17 +129,17 @@ YUI().use(["test", "reactive", "model"], function (Y) {
             model.set('name', 'OTHER NAME 4');
             model.set('name', 'OTHER NAME 5');
 
-            this.wait(function(){
+            this.wait(function () {
                 Y.Assert.areSame(2, computationSpy.callCount);
             }, 10);
         },
 
-        'destructor should stop all reactive computations': function(){
+        'destructor should stop all reactive computations': function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
-                    ATTRS: {
-                        name: {}
-                    }
-                }),
+                ATTRS: {
+                    name: {}
+                }
+            }),
                 model = new ModelClass({
                     name: 'SOME NAME'
                 })
@@ -165,9 +165,9 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                });
 
             Y.Assert.areSame(model, Y.Reactive.mix(model));
         },
@@ -178,9 +178,9 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            });
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                });
 
             Y.Assert.areSame(model, Y.Reactive.mix(model));
             Y.Assert.isObject(model._deps);
@@ -193,10 +193,10 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                     name: {}
                 }
             }),
-            model = new ModelClass({
-                name: 'SOME NAME'
-            }),
-            oldDeps = model._deps;
+                model = new ModelClass({
+                    name: 'SOME NAME'
+                }),
+                oldDeps = model._deps;
 
             Y.Assert.areSame(model, Y.Reactive.mix(model));
             Y.Assert.areSame(oldDeps, model._deps);
