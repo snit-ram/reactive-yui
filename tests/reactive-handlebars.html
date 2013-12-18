@@ -257,6 +257,28 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
             })));
         },
 
+        "should fallback property lookup to a helper": function () {
+            Y.ReactiveHandlebars.registerHelper('echo', function () {
+                return {
+                    result: 'ECHO_HELPER_RESULT'
+                };
+            });
+            Y.ReactiveHandlebars.registerHelper('isMe', function () {
+                return {
+                    result: 'ISME_HELPER_RESULT'
+                };
+            });
+            var template = Y.ReactiveHandlebars.compile("<div>{{echo.result}}</div><div>{{inexistentProperty.echo}}</div><div>{{isMe.result}}</div><div>{{inexistentProperty.isMe}}</div>"),
+                model = new Y.Model({
+                    isMe: false
+                });
+
+            Y.Assert.areSame('<div>ECHO_HELPER_RESULT</div><div></div><div></div><div></div>', stripScripts(template(model)));
+            Y.Assert.areSame('<div>ECHO_HELPER_RESULT</div><div></div><div></div><div></div>', stripScripts(template({
+                isMe: false
+            })));
+        },
+
         "should not fallback property lookup in full paths": function () {
             var template = Y.ReactiveHandlebars.compile("{{#each list}}<div>{{this.name}}</div><div>{{this.age}}</div>{{/each}}"),
                 modelList = new Y.ModelList();

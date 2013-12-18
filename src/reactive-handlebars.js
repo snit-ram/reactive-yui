@@ -134,7 +134,7 @@ YUI.add("reactive-handlebars", function (Y) {
                     return returnValue = firstContextWithMethod[id](returnValue);
                 }
 
-                Y.Array.some(contexts, function (context) {
+                var hasFound = Y.Array.some(contexts, function (context) {
                     if (context._ATTR_E_FACADE) {
                         // We should skip this context if the ModelList does not have the desired attribute
                         // otherwise ModelList.get would return values from its items
@@ -155,6 +155,10 @@ YUI.add("reactive-handlebars", function (Y) {
                     returnValue = undefined;
                     return false;
                 });
+
+                if (!hasFound && identifierPathIndex === 0 && Y.Handlebars.helpers[id]) {
+                    returnValue = Y.Handlebars.helpers[id](returnValue);
+                }
             }
         });
 
