@@ -4,6 +4,8 @@ YUI.add("reactive-model-list", function (Y) {
     Y.ReactiveModelList = Y.Base.create("ReactiveModelList", Y.ModelList, [Y.Reactive], {
         initializer: function () {
             this._reactivePendingChanges = [];
+            Y.Do.before(this._trackList, this, "getById", this);
+            Y.Do.before(this._trackList, this, "getByClientId", this);
             Y.Do.before(this._trackList, this, "item", this);
             Y.Do.before(this._trackList, this, "each", this);
             Y.Do.before(this._trackList, this, "size", this);

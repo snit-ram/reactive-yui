@@ -26,7 +26,7 @@ YUI().use(["test", "reactive-model-list", "model"], function (Y) {
         },
 
         "should track on desired methods": function () {
-            ['size', 'some', 'filter', 'toArray'].forEach(function (method) {
+            ['size', 'some', 'filter', 'toArray', 'getById', 'getByClientId'].forEach(function (method) {
                 var ModelListClass = Y.Base.create('Reactive' + Date.now(), Y.ReactiveModelList, [], {}, {
                     ATTRS: {
                         name: {}
