@@ -84,6 +84,15 @@ YUI().use(["test", "reactive-handlebars", "model", "model-list", "reactive-model
             Y.Assert.areSame('ATTRIBUTE NAME', stripScripts(template(model)));
         },
 
+        "should consider and empty array as false": function () {
+            var template = Y.ReactiveHandlebars.compile("<div>{{#if list}}TRUE_BLOCK{{else}}ELSE_BLOCK{{/if}}</div>");
+            var plainData = {
+                list: []
+            };
+
+            Y.Assert.areSame('<div>ELSE_BLOCK</div>', stripScripts(template(plainData)));
+        },
+
         "should invoke block helpers resolving params": function () {
             Y.ReactiveHandlebars.registerHelper("isMe", function (param, options) {
                 if (param === 'me') {

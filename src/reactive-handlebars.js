@@ -381,6 +381,10 @@ YUI.add("reactive-handlebars", function (Y) {
                     value = executionInfo.params[0];
 
                 if (value) {
+                    if (value instanceof Array && value.length === 0) {
+                        return options.inverse(this, options.data);
+                    }
+
                     if (value._isYUIModelList && value.size() === 0) {
                         return options.inverse(this, options.data);
                     }
