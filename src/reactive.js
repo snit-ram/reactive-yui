@@ -15,9 +15,7 @@ YUI.add("reactive", function (Y) {
     };
 
     ReactiveExtension.prototype.destructor = function () {
-        this._reactiveComputations.forEach(function (computation) {
-            computation.stop();
-        });
+        Y.Array.invoke(this._reactiveComputations, "stop");
         this._reactiveComputations = [];
     };
 
@@ -50,6 +48,7 @@ YUI.add("reactive", function (Y) {
     Y.Reactive = ReactiveExtension;
 }, "@VERSION@", {
     requires: [
-        "deps"
+        "array-invoke",
+        "deps",
     ]
 });
