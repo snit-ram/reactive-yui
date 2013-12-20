@@ -17,6 +17,7 @@ YUI.add("reactive", function (Y) {
     ReactiveExtension.prototype.destructor = function () {
         Y.Array.invoke(this._reactiveComputations, "stop");
         this._reactiveComputations = [];
+        this._deps = {};
     };
 
     ReactiveExtension.prototype._trackAttribute = function (attribute) {

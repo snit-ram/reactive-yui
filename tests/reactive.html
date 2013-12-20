@@ -154,7 +154,7 @@ YUI().use(["test", "reactive", "model"], function (Y) {
             }, 10);
         },
 
-        'destructor should stop all reactive computations': function () {
+        'destructor should stop all reactive computations and dependency tracking': function () {
             var ModelClass = Y.Base.create('Reactive' + Date.now(), Y.Model, [Y.Reactive], {}, {
                 ATTRS: {
                     name: {}
@@ -171,12 +171,16 @@ YUI().use(["test", "reactive", "model"], function (Y) {
                 };
 
 
+            model._deps = {
+                someDep: new Y.Deps.Dependency()
+            };
             model._reactiveComputations = [firstComputation, secondComputation];
             model.destroy();
 
             Y.Assert.isTrue(firstComputation.stop.called);
             Y.Assert.isTrue(secondComputation.stop.called);
             Y.Assert.areSame(0, model._reactiveComputations.length);
+            Y.Assert.areSame(0, Y.Object.keys(model._deps).length);
         },
 
         "mix should return the same object": function () {
