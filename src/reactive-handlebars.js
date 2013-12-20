@@ -166,25 +166,20 @@ YUI.add("reactive-handlebars", function (Y) {
     }
 
     function getResolvedAttributeValuesFromParams(optionsHash, context, additionalContexts) {
-        var params = [],
-            paramsIDs = !optionsHash._params ? [] : optionsHash._params.split(','),
+        var paramsIDs = !optionsHash._params ? [] : optionsHash._params.split(','),
             paramTypes = !optionsHash._types ? [] : optionsHash._types.split(',');
 
-        Y.Array.each(paramTypes, function (type, index) {
-            var id = paramsIDs[index],
-                value;
+        return Y.Array.map(paramTypes, function (type, index) {
+            var id = paramsIDs[index];
 
             if (type === 'ID') {
-                value = _resolveAttributeValue(id, context, additionalContexts);
+                return _resolveAttributeValue(id, context, additionalContexts);
             } else if (type === 'BOOLEAN') {
-                value = id === "true";
+                return id === "true";
             } else {
-                value = id;
+                return id;
             }
-            params.push(value);
         });
-
-        return params;
     }
 
     function replaceContent(id, value) {
