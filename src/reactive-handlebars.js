@@ -319,6 +319,40 @@ YUI.add("reactive-handlebars", function (Y) {
         });
     });
 
+    function findInContext(context, path) {
+        path.split('.').forEach(function (id) {
+            context = context[id];
+        });
+        return context;
+    }
+
+    Y.Handlebars.registerHelper('view', function (viewName, options) {
+        var placeholderId = Y.guid(),
+            view,
+            ViewClass = findInContext(Y, viewName);
+
+        var parentView = _.find([this].concat(options.data._depths), function (view) {
+            if (view instanceof Y.View) {
+                return view;
+            }
+        });
+
+        Y.Deps.nonreactive(function () {
+            view = new ViewClass(_.assign(options.hash, {
+                parentView: parentView
+            }));
+
+            view.render();
+        });
+
+        parentView.rendered.then(function () {
+            var placeholderElement = Y.one('#' + placeholderId);
+            placeholderElement.replace(view.get('container'));
+        });
+
+        return new Y.Handlebars.SafeString('<div id="' + placeholderId + '"></div>');
+    });
+
     Y.ReactiveHandlebars.registerLowLevelHelper('bindAttr', function (_options) {
         var id = Y.guid();
 

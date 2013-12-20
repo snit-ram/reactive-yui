@@ -2,11 +2,18 @@ YUI.add("reactive-view", function (Y) {
     "use strict";
 
     Y.ReactiveView = Y.Base.create("ReactiveView", Y.View, [Y.Reactive], {
+        initializer: function () {
+            var self = this;
+
+            self.rendered = new Y.Promise(function (resolver) {
+                self._renderPromiseResolver = resolver;
+            });
+        },
+
         beforeRender: function () {},
         afterRender: function () {},
 
-        destructor: function () {
-        },
+        destructor: function () {},
 
         render: function () {
             var self = this;
@@ -24,6 +31,9 @@ YUI.add("reactive-view", function (Y) {
             }
 
             self.get('container').setContent(contents);
+
+            self._renderPromiseResolver();
+
             self.afterRender();
 
             return this;
@@ -33,6 +43,7 @@ YUI.add("reactive-view", function (Y) {
     requires: [
         "deps",
         "view",
-        "reactive"
+        "reactive",
+        "promise"
     ]
 });
