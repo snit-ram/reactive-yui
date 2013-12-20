@@ -326,14 +326,14 @@ YUI.add("reactive-handlebars", function (Y) {
             view,
             ViewClass = findInContext(Y, viewName);
 
-        var parentView = _.find([this].concat(options.data._depths), function (view) {
+        var parentView = Y.Array.find([this].concat(options.data._depths), function (view) {
             if (view instanceof Y.View) {
                 return view;
             }
         });
 
         Y.Deps.nonreactive(function () {
-            view = new ViewClass(_.assign(options.hash, {
+            view = new ViewClass(Y.merge(options.hash, {
                 parentView: parentView
             }));
 
