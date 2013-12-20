@@ -1,10 +1,7 @@
 YUI.add("reactive", function (Y) {
     "use strict";
 
-    var ignoredAttributes = {
-        "initialized": true,
-        "destroyed": true
-    };
+    var ignoredAttributes = ["initialized", "destroyed"];
 
     function ReactiveExtension() {}
     ReactiveExtension.NAME = 'ReactiveExtension';
@@ -21,7 +18,7 @@ YUI.add("reactive", function (Y) {
     };
 
     ReactiveExtension.prototype._trackAttribute = function (attribute) {
-        if (ignoredAttributes[attribute]) {
+        if (ignoredAttributes.indexOf(attribute) !== -1) {
             return;
         }
 
