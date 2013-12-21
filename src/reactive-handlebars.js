@@ -517,8 +517,7 @@ YUI.add("reactive-handlebars", function (Y) {
             },
             decorate: function (value) {
                 value && value.size && value.size();
-                var x = new Y.ReactiveHandlebars.SafeString('<script id="_reactive_handlebars_' + id + '"></script>' + getListContents(value, id) + '<script id="_reactive_handlebars_' + id + '_end"></script>');
-                return x;
+                return new Y.ReactiveHandlebars.SafeString('<script id="_reactive_handlebars_' + id + '"></script>' + getListContents(value, id) + '<script id="_reactive_handlebars_' + id + '_end"></script>');
             },
             update: function (value) {
                 if (value && !value._isYUIModelList) {
