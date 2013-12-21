@@ -89,7 +89,7 @@ YUI.add("reactive-handlebars", function (Y) {
             types.push('ID');
         }
 
-        (mustache.params || []).map(function (param) {
+        (mustache.params || []).forEach(function (param) {
             paramsIDs.push(param.stringModeValue);
             types.push(param.type);
 
