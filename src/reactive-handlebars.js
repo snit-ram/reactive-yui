@@ -550,15 +550,15 @@ YUI.add("reactive-handlebars", function (Y) {
                             }
 
                         } else if (/:remove$/.test(pendingChange.type)) {
-                            node = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index);
-                            var nextNode;
+                            var nodeToRemove = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index),
+                                nextNode;
 
                             while (!node.hasClass('_reactive_handlebars_' + itemId + '_end')) {
                                 nextNode = Y.one(node.getDOMNode().nextSibling);
-                                node.remove();
-                                node = nextNode;
+                                nodeToRemove.remove();
+                                nodeToRemove = nextNode;
                             }
-                            node.remove();
+                            nodeToRemove.remove();
 
                             if (value.size() === 0) {
                                 replaceContent(id, getListContents([], id));
