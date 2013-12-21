@@ -116,16 +116,16 @@ YUI.add("reactive-handlebars", function (Y) {
                 return returnValue;
             }
 
-            var contexts = [returnValue],
-                reversedContexts = [returnValue];
-
-            if (identifierPathIndex === 0) {
-                contexts = contexts.concat(additionalContexts || []);
-                reversedContexts = reversedContexts.concat(additionalContexts || []).reverse();
-            }
-
             // when accessing this, we don't need to change the context
             if (id !== 'this') {
+                var contexts = [returnValue],
+                    reversedContexts = [returnValue];
+
+                if (identifierPathIndex === 0) {
+                    contexts = contexts.concat(additionalContexts || []);
+                    reversedContexts = reversedContexts.concat(additionalContexts || []).reverse();
+                }
+
                 var firstContextWithMethod = Y.Array.find(reversedContexts, function (context) {
                     return Y.Lang.isFunction(context[id]);
                 });
