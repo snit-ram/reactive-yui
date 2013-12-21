@@ -493,10 +493,9 @@ YUI.add("reactive-handlebars", function (Y) {
                         var id = listId + '_list_item';
                         listContents += '<script class="_reactive_handlebars_' + id + '"></script>' + options.fn(item, options.data) + '<script class="_reactive_handlebars_' + id + '_end"></script>';
                     });
+                } else if (value.length === 0) {
+                    return options.inverse(self, options.data);
                 } else {
-                    if (value.length === 0) {
-                        return options.inverse(self, options.data);
-                    }
                     Y.Array.each(value, function (item) {
                         var id = listId + '_list_item',
                             itemHTML = options.fn(item, options.data);
