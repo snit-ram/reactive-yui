@@ -341,5 +341,5 @@ YUI.add("deps", function (Y) {
 
     Y.Deps = Deps;
 }, "@VERSION@", {
-    requires: []
+    requires: ["oop"]
 });
