@@ -341,7 +341,7 @@ YUI.add("reactive-handlebars", function (Y) {
         });
 
         parentView.rendered.then(function () {
-            var placeholderElement = Y.one('#' + placeholderId);
+            var placeholderElement = parentView.get('container').one('#' + placeholderId);;
             placeholderElement.replace(view.get('container'));
         });
 
