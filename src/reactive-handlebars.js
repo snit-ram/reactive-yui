@@ -551,8 +551,8 @@ YUI.add("reactive-handlebars", function (Y) {
                             var nodeToRemove = Y.all('._reactive_handlebars_' + itemId).item(pendingChange.index),
                                 nextNode;
 
-                            while (!node.hasClass('_reactive_handlebars_' + itemId + '_end')) {
-                                nextNode = Y.one(node.getDOMNode().nextSibling);
+                            while (!nodeToRemove.hasClass('_reactive_handlebars_' + itemId + '_end')) {
+                                nextNode = Y.one(nodeToRemove.getDOMNode().nextSibling);
                                 nodeToRemove.remove();
                                 nodeToRemove = nextNode;
                             }
