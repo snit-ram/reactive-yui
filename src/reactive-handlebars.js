@@ -131,7 +131,7 @@ YUI.add("reactive-handlebars", function (Y) {
                 });
 
                 if (firstContextWithMethod) {
-                    return returnValue = firstContextWithMethod[id](returnValue);
+                    return returnValue = firstContextWithMethod[id](initialContext);
                 }
 
                 var hasFound = Y.Array.some(contexts, function (context) {
@@ -157,7 +157,7 @@ YUI.add("reactive-handlebars", function (Y) {
                 });
 
                 if (!hasFound && identifierPathIndex === 0 && Y.Handlebars.helpers[id]) {
-                    returnValue = Y.Handlebars.helpers[id](returnValue);
+                    returnValue = Y.Handlebars.helpers[id](initialContext);
                 }
             }
         });
